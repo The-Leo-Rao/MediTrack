@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "902563643932",
+    "project_id": "medistack-3403d",
+    "storage_bucket": "medistack-3403d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902563643932:android:efb69103869a9e05ee95d9",
+        "android_client_info": {
+          "package_name": "com.example.meditrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtMvNp4f_kJd-gSdDBS0J9Rk-MpdoX-xM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
