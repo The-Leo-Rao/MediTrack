@@ -85,8 +85,20 @@ class DBHelper(private val context: Context) :
         scheduleAlarm(
             context,
             id.toInt(),
-            t1
+            t1,
+            med,
+            dose
         )
+
+        if(t2.toInt()!=0){
+            scheduleAlarm(
+                context,
+                id.toInt(),
+                t2,
+                med,
+                dose
+            )
+        }
     }
 
     fun getAll(): List<Record>{

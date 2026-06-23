@@ -2,12 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--LOC PERM-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <!--NOTIF PERM-->
     <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -31,12 +36,14 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".AlarmActivity"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:exported="false" />
+        <service
+            android:name=".AlarmService"
+            android:exported="false"/>
 
+        <receiver
+            android:name=".StopAlarmReceiver"
+            android:exported="false"/>
+        
         <receiver
             android:name=".ReminderReceiver"
             android:exported="false"/>

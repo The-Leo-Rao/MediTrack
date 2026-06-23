@@ -94,8 +94,12 @@ fun DocScreen(navController: NavController){
             val smsGranted =
                 permissions[Manifest.permission.SEND_SMS] ?: false
 
+            val notificationGranted =
+                permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
+
             Log.d("PERMS", "Location: $locationGranted")
             Log.d("PERMS", "SMS: $smsGranted")
+            Log.d("PERMS", "Notifications: $notificationGranted")
         }
 
     LaunchedEffect(Unit) {
@@ -116,7 +120,8 @@ fun DocScreen(navController: NavController){
             permissionLauncher.launch(
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.SEND_SMS
+                    Manifest.permission.SEND_SMS,
+                    Manifest.permission.POST_NOTIFICATIONS
                 )
             )
         }
