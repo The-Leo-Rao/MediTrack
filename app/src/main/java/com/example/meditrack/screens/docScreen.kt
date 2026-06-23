@@ -1,5 +1,8 @@
 package com.example.meditrack.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -61,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.meditrack.NotificationHelper
 import kotlinx.coroutines.delay
@@ -74,6 +78,46 @@ import java.util.Locale
 fun DocScreen(navController: NavController){
 
     val context = LocalContext.current
+
+    val permissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            val locationGranted =
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+
+            val smsGranted =
+                permissions[Manifest.permission.SEND_SMS] ?: false
+
+            Log.d("PERMS", "Location: $locationGranted")
+            Log.d("PERMS", "SMS: $smsGranted")
+        }
+
+    LaunchedEffect(Unit) {
+
+        val locationGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        val smsGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.SEND_SMS
+            ) == PackageManager.PERMISSION_GRANTED
+
+        if (!locationGranted || !smsGranted) {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.SEND_SMS
+                )
+            )
+        }
+    }
+
     val dbHelper = DBHelper(context)
     val notificationHelper = NotificationHelper(context)
 
@@ -85,8 +129,17 @@ fun DocScreen(navController: NavController){
     LaunchedEffect(pressed) {
         if (pressed) {
             delay(3000)
-            notificationHelper.CallSOS()
-            SOScalled=true
+            if (
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.d("SOS", "Permission granted")
+                notificationHelper.CallSOS()
+                SOScalled=true
+            }
+            else{Log.d("SOS","Permission denied") }
         }
     }
 
@@ -459,6 +512,8 @@ fun DocScreen(navController: NavController){
         }
     ){padding->
 
+        Box(modifier = Modifier.fillMaxSize()) {
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -472,34 +527,14 @@ fun DocScreen(navController: NavController){
                 item {
                     Box(
                         modifier = Modifier
-                            .padding(end =10.dp)
+                            .padding(end = 10.dp)
                             .fillMaxWidth(),
-                    ){
+                    ) {
                         Text(
                             "RECORDS",
                             modifier = Modifier.align(Alignment.Center),
                             style = MaterialTheme.typography.titleLarge
                         )
-
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .size(60.dp)
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onPress = {
-                                            pressed = true
-                                            try {
-                                                tryAwaitRelease()
-                                            } finally {
-                                                pressed = false
-                                            }
-                                        }
-                                    )
-                                }
-                                .background(Color(90,30,30), shape = CircleShape),
-                            contentAlignment = Alignment.Center
-                        ){Text("SOS")}
                     }
                 }
 
@@ -572,6 +607,28 @@ fun DocScreen(navController: NavController){
                 }
             }
 
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 40.dp, end = 20.dp)
+                    .size(60.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = {
+                                pressed = true
+                                try {
+                                    tryAwaitRelease()
+                                } finally {
+                                    pressed = false
+                                }
+                            }
+                        )
+                    }
+                    .background(Color(90,30,30), shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ){Text("SOS")}
+        }
+
     }
 
     if(delAlert){
@@ -592,7 +649,7 @@ fun DocScreen(navController: NavController){
 
     if(SOScalled){
         AlertDialog(
-            onDismissRequest = {},
+            onDismissRequest = {SOScalled=false},
             confirmButton = {},
             text={
                 Column(

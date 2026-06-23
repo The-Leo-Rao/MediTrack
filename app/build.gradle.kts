@@ -40,6 +40,9 @@ android {
 
 dependencies {
 
+    //SMS
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
     //Displaying images
     implementation("io.coil-kt:coil-compose:2.7.0")
 
@@ -54,6 +57,7 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
