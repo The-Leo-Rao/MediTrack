@@ -39,6 +39,8 @@ android {
 }
 
 dependencies {
+    //Graph
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     //SMS
     implementation("com.google.android.gms:play-services-location:21.3.0")
