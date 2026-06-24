@@ -1,4 +1,4 @@
-package com.example.meditrack.navigation
+package com.example.meditrack.Notification
 
 import android.Manifest
 import android.app.PendingIntent

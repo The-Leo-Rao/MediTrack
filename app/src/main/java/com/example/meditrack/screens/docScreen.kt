@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -60,7 +59,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -68,12 +67,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
-import com.example.meditrack.NotificationHelper
+import com.example.meditrack.Notification.NotificationHelper
 import kotlinx.coroutines.delay
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -159,8 +159,9 @@ fun DocScreen(navController: NavController){
 
                 var type by remember { mutableStateOf("") }
                 var content by remember { mutableStateOf("") }
-                var showDialog by remember{ mutableStateOf(false) }
 
+
+                var showDialog by remember{ mutableStateOf(false) }
                 var newPrescription by remember { mutableStateOf(false) }
                 var newSymptom by remember { mutableStateOf(false) }
                 var newNote by remember { mutableStateOf(false) }
@@ -394,6 +395,7 @@ fun DocScreen(navController: NavController){
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ){
                                 var note by remember { mutableStateOf("") }
+                                var sever by remember { mutableStateOf(0) }
 
                                 Text(
                                     "Enter new symptom",
@@ -412,9 +414,24 @@ fun DocScreen(navController: NavController){
 
                                 Spacer(Modifier.height(15.dp))
 
+                                Text(
+                                    "Severity scale",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.align(Alignment.Start))
+
+                                Spacer(Modifier.height(15.dp))
+
+                                Slider(
+                                    value = sever.toFloat(),
+                                    onValueChange = {sever=it.roundToInt()},
+                                    valueRange = 0f..10f,
+                                    steps=9
+                                )
+
+
                                 Button(
                                     onClick = {
-                                        dbHelper.AddRecord(type,note, System.currentTimeMillis())
+                                        dbHelper.AddRecord(type,(note+sever.toString()), System.currentTimeMillis())
                                         showDialog=false
                                         newSymptom=false
                                     },
@@ -570,11 +587,26 @@ fun DocScreen(navController: NavController){
                             Spacer(Modifier.height(15.dp))
 
                             when {
-                                ("DOCTORS NOTE NEW SYMPTOM NEW PRESCRIPTION".contains(record.type)) -> {
+                                ("DOCTORS NOTE NEW PRESCRIPTION".contains(record.type)) -> {
                                     Text(
                                         record.data.toString(),
                                         style = MaterialTheme.typography.bodyMedium
                                     )
+                                }
+
+                                (record.type.equals("NEW SYMPTOM"))->{
+                                    Text(
+                                        record.data.toString().dropLast(1),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+
+                                    Spacer(Modifier.height(5.dp))
+
+                                    Text(
+                                        "Severity: "+record.data.toString().last().toString(),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+
                                 }
 
                                 (record.type.equals("FOLLOW UP")) -> {

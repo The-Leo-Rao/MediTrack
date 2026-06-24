@@ -37,15 +37,15 @@
         </activity>
 
         <service
-            android:name=".navigation.AlarmService"
+            android:name=".Notification.AlarmService"
             android:exported="false"/>
 
         <receiver
-            android:name=".navigation.StopAlarmReceiver"
+            android:name=".Notification.StopAlarmReceiver"
             android:exported="false"/>
         
         <receiver
-            android:name=".navigation.ReminderReceiver"
+            android:name=".Notification.ReminderReceiver"
             android:exported="false"/>
 
     </application>

@@ -2,7 +2,9 @@ package com.example.meditrack.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.widget.Button
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AcUnit
 import androidx.compose.material.icons.rounded.AccountCircle
@@ -31,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,17 +48,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.meditrack.navigation.NotificationHelper
+import com.example.meditrack.DBHelper
+import com.example.meditrack.Notification.NotificationHelper
 import kotlinx.coroutines.delay
+import androidx.compose.material3.Button
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import com.example.meditrack.Vital
+import com.example.meditrack.data.VitalType
+import com.example.meditrack.graph.GraphPoint
+import com.example.meditrack.ui.VitalChartView
 
 @Composable
 fun VitalScreen(navController: NavController){
+
     val context = LocalContext.current
+    val dbHelper= DBHelper(context)
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar ={
@@ -132,6 +148,16 @@ fun VitalScreen(navController: NavController){
         var pressed by remember { mutableStateOf(false) }
         var SOScalled by remember { mutableStateOf(false) }
 
+        var dialog by remember { mutableStateOf(false) }
+        var type by remember { mutableStateOf("") }
+
+        var BP by remember { mutableStateOf(false) }
+        var sp02 by remember { mutableStateOf(false) }
+        var temp by remember { mutableStateOf(false) }
+        var weight by remember { mutableStateOf(false) }
+        var hRate by remember { mutableStateOf(false) }
+        var sugar by remember { mutableStateOf(false) }
+
         LaunchedEffect(pressed) {
             if (pressed) {
                 delay(3000)
@@ -192,7 +218,11 @@ fun VitalScreen(navController: NavController){
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(175.dp),
+                                .height(175.dp)
+                                .clickable{
+                                    type="BLOOD PRESSURE"
+                                    dialog=true
+                                          },
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Box(
@@ -211,7 +241,10 @@ fun VitalScreen(navController: NavController){
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(175.dp),
+                                .height(175.dp)
+                                .clickable{
+                                    type="SPO2"
+                                    dialog=true},
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Box(
@@ -238,7 +271,10 @@ fun VitalScreen(navController: NavController){
                         Card(
                             modifier = Modifier
                                 .weight(1f)
-                                .aspectRatio(1f),
+                                .aspectRatio(1f)
+                                .clickable{
+                                    type="BODY TEMPERATURE"
+                                    dialog=true},
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Box(
@@ -257,7 +293,10 @@ fun VitalScreen(navController: NavController){
                         Card(
                             modifier = Modifier
                                 .weight(1f)
-                                .aspectRatio(1f),
+                                .aspectRatio(1f)
+                                .clickable{
+                                    type="WEIGHT"
+                                    dialog=true},
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Box(
@@ -284,7 +323,10 @@ fun VitalScreen(navController: NavController){
                         Card(
                             modifier = Modifier
                                 .weight(1f)
-                                .aspectRatio(1f),
+                                .aspectRatio(1f)
+                                .clickable{
+                                    type="HEART RATE"
+                                    dialog=true},
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Box(
@@ -293,7 +335,7 @@ fun VitalScreen(navController: NavController){
                                     .padding(15.dp)
                             ) {
                                 Text(
-                                    "BPM",
+                                    "Heart rate",
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.align(Alignment.TopStart)
                                 )
@@ -303,7 +345,10 @@ fun VitalScreen(navController: NavController){
                         Card(
                             modifier = Modifier
                                 .weight(1f)
-                                .aspectRatio(1f),
+                                .aspectRatio(1f)
+                                .clickable{
+                                    type="BLOOD SUGAR"
+                                    dialog=true},
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Box(
@@ -326,7 +371,8 @@ fun VitalScreen(navController: NavController){
                         modifier = Modifier
                             .padding(15.dp)
                             .fillMaxWidth()
-                            .height(60.dp),
+                            .height(60.dp)
+                            .clickable{},
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Row(
@@ -351,6 +397,69 @@ fun VitalScreen(navController: NavController){
             }
         }
 
+        if(dialog){
+            Dialog(
+                onDismissRequest = {dialog=false}
+            ){
+
+                val data = dbHelper.getAVital(type)
+
+                val points = data.map {
+                    GraphPoint(
+                        t = it.timestamp,
+                        value = it.val1,
+                        value2 = it.val2
+                    )
+                }
+
+                val vitalType = when (type) {
+                    "HEART RATE" -> VitalType.HEART_RATE
+                    "BLOOD PRESSURE" -> VitalType.BLOOD_PRESSURE
+                    "SPO2" -> VitalType.SPO2
+                    "BODY TEMPERATURE" -> VitalType.TEMPERATURE
+                    "BLOOD SUGAR"-> VitalType.BLOOD_SUGAR
+                    else -> VitalType.HEART_RATE
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors= CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ){
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 15.dp, horizontal = 15.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        AndroidView(
+                            factory = { context ->
+                                VitalChartView(context)
+                            },
+                            update = { chart ->
+                                chart.setData(vitalType, points, follow = true)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                        )
+
+                        Spacer(Modifier.height(25.dp))
+
+                        Button(onClick = {
+                            when{
+                                type.equals("HEART RATE")->{hRate=true}
+                                type.equals("BLOOD SUGAR")->{sugar=true}
+                                type.equals("WEIGHT")->{weight=true}
+                                type.equals("BODY TEMPERATURE")->{temp=true}
+                                type.equals("BLOOD PRESSURE")->{BP=true}
+                                type.equals("SPO2")->{sp02=true}
+                            }
+                        }){Text("Add Record", style = MaterialTheme.typography.labelSmall)}
+                    }
+                }
+            }
+        }
+
+
         if(SOScalled){
             AlertDialog(
                 onDismissRequest = {},
@@ -361,6 +470,349 @@ fun VitalScreen(navController: NavController){
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text("SOS Has been called and your emergency contact has been notified", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge)
+                    }
+                }
+            )
+        }
+
+        if(hRate){
+
+            var val1 by remember { mutableStateOf("") }
+            var note by remember { mutableStateOf("") }
+
+            AlertDialog(
+                onDismissRequest = {hRate=false},
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            when{
+                                val1.isBlank()->{}
+                                else->{
+                                    dbHelper.setAVital("HEART RATE",val1.toDouble(),0.0,"bpm",System.currentTimeMillis(),note)
+                                    hRate=false
+                                }
+                            }
+                        }
+                    ){Text("Log", style = MaterialTheme.typography.labelSmall)}
+                },
+                title = {Text("Log an entry", style = MaterialTheme.typography.bodyLarge)},
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = val1,
+                            onValueChange = { newValue ->
+                                if (newValue.all { it.isDigit() || it == '.' }) {
+                                    val1 = newValue
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            label={Text("Enter heart rate")},
+                            suffix = {Text("bpm", style = MaterialTheme.typography.labelSmall)}
+                        )
+
+                        Spacer(Modifier.height(15.dp))
+
+                        OutlinedTextField(
+                            value = note,
+                            onValueChange = {note=it},
+                            singleLine = true,
+                            label={Text("Enter note if any")}
+                        )
+                    }
+                }
+            )
+        }
+
+        if(sugar){
+
+            var val1 by remember { mutableStateOf("") }
+            var note by remember { mutableStateOf("") }
+
+            AlertDialog(
+                onDismissRequest = {sugar=false},
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            when{
+                                val1.isBlank()->{}
+                                else->{
+                                    dbHelper.setAVital("BLOOD SUGAR",val1.toDouble(),0.0,"mg/dL",System.currentTimeMillis(),note)
+                                    sugar=false
+                                }
+                            }
+                        }
+                    ){Text("Log", style = MaterialTheme.typography.labelSmall)}
+                },
+                title = {Text("Log an entry", style = MaterialTheme.typography.bodyLarge)},
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = val1,
+                            onValueChange = { newValue ->
+                                if (newValue.all { it.isDigit() || it == '.' }) {
+                                    val1 = newValue
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            label={Text("Enter blood sugar reading")},
+                            suffix = {Text("mg/dL", style = MaterialTheme.typography.labelSmall)}
+                        )
+
+                        Spacer(Modifier.height(15.dp))
+
+                        OutlinedTextField(
+                            value = note,
+                            onValueChange = {note=it},
+                            singleLine = true,
+                            label={Text("Enter note if any")}
+                        )
+                    }
+                }
+            )
+        }
+
+        if(temp){
+
+            var val1 by remember { mutableStateOf("") }
+            var note by remember { mutableStateOf("") }
+
+            AlertDialog(
+                onDismissRequest = {temp=false},
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            when{
+                                val1.isBlank()->{}
+                                else->{
+                                    dbHelper.setAVital("BODY TEMPERATURE",val1.toDouble(),0.0,"°C",System.currentTimeMillis(),note)
+                                    temp=false
+                                }
+                            }
+                        }
+                    ){Text("Log", style = MaterialTheme.typography.labelSmall)}
+                },
+                title = {Text("Log an entry", style = MaterialTheme.typography.bodyLarge)},
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = val1,
+                            onValueChange = { newValue ->
+                                if (newValue.all { it.isDigit() || it == '.' }) {
+                                    val1 = newValue
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            label={Text("Enter body temperature")},
+                            suffix = {Text("°C", style = MaterialTheme.typography.labelSmall)}
+                        )
+
+                        Spacer(Modifier.height(15.dp))
+
+                        OutlinedTextField(
+                            value = note,
+                            onValueChange = {note=it},
+                            singleLine = true,
+                            label={Text("Enter note if any")}
+                        )
+                    }
+                }
+            )
+        }
+
+        if(weight){
+
+            var val1 by remember { mutableStateOf("") }
+            var note by remember { mutableStateOf("") }
+
+            AlertDialog(
+                onDismissRequest = {weight=false},
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            when{
+                                val1.isBlank()->{}
+                                else->{
+                                    dbHelper.setAVital("WEIGHT",val1.toDouble(),0.0,"kg",System.currentTimeMillis(),note)
+                                    weight=false
+                                }
+                            }
+                        }
+                    ){Text("Log", style = MaterialTheme.typography.labelSmall)}
+                },
+                title = {Text("Log an entry", style = MaterialTheme.typography.bodyLarge)},
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = val1,
+                            onValueChange = { newValue ->
+                                if (newValue.all { it.isDigit() || it == '.' }) {
+                                    val1 = newValue
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            label={Text("Enter body weight")},
+                            suffix = {Text("kg", style = MaterialTheme.typography.labelSmall)}
+                        )
+
+                        Spacer(Modifier.height(15.dp))
+
+                        OutlinedTextField(
+                            value = note,
+                            onValueChange = {note=it},
+                            singleLine = true,
+                            label={Text("Enter note if any")}
+                        )
+                    }
+                }
+            )
+        }
+
+        if(BP){
+
+            var val1 by remember { mutableStateOf("") }
+            var val2 by remember { mutableStateOf("") }
+            var note by remember { mutableStateOf("") }
+
+            AlertDialog(
+                onDismissRequest = {BP=false},
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            when{
+                                val1.isBlank()->{}
+                                val2.isBlank()->{}
+                                else->{
+                                    dbHelper.setAVital("BLOOD PRESSURE",val1.toDouble(),val2.toDouble(),"mmHg",System.currentTimeMillis(),note)
+                                    BP=false
+                                }
+                            }
+                        }
+                    ){Text("Log", style = MaterialTheme.typography.labelSmall)}
+                },
+                title = {Text("Log an entry", style = MaterialTheme.typography.bodyLarge)},
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = val1,
+                            onValueChange = { newValue ->
+                                if (newValue.all { it.isDigit() || it == '.' }) {
+                                    val1 = newValue
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            label={Text("Enter systolic pressure")},
+                            suffix = {Text("mmHg", style = MaterialTheme.typography.labelSmall)}
+                        )
+
+                        Spacer(Modifier.height(15.dp))
+
+                        OutlinedTextField(
+                            value = val2,
+                            onValueChange = { newValue ->
+                                if (newValue.all { it.isDigit() || it == '.' }) {
+                                    val2 = newValue
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            label={Text("Enter diastolic pressure")},
+                            suffix = {Text("mmHg", style = MaterialTheme.typography.labelSmall)}
+                        )
+
+                        Spacer(Modifier.height(15.dp))
+
+                        OutlinedTextField(
+                            value = note,
+                            onValueChange = {note=it},
+                            singleLine = true,
+                            label={Text("Enter note if any")}
+                        )
+                    }
+                }
+            )
+        }
+
+        if(sp02){
+
+            var val1 by remember { mutableStateOf("") }
+            var note by remember { mutableStateOf("") }
+
+            AlertDialog(
+                onDismissRequest = {sp02=false},
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            when{
+                                val1.isBlank()->{}
+                                else->{
+                                    dbHelper.setAVital("SPO2",val1.toDouble(),0.0,"%",System.currentTimeMillis(),note)
+                                    sp02=false
+                                }
+                            }
+                        }
+                    ){Text("Log", style = MaterialTheme.typography.labelSmall)}
+                },
+                title = {Text("Log an entry", style = MaterialTheme.typography.bodyLarge)},
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = val1,
+                            onValueChange = { newValue ->
+                                if (newValue.all { it.isDigit() || it == '.' }) {
+                                    val1 = newValue
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            label={Text("Enter SpO2")},
+                            suffix = {Text("%", style = MaterialTheme.typography.labelSmall)}
+                        )
+
+                        Spacer(Modifier.height(15.dp))
+
+                        OutlinedTextField(
+                            value = note,
+                            onValueChange = {note=it},
+                            singleLine = true,
+                            label={Text("Enter note if any")}
+                        )
                     }
                 }
             )

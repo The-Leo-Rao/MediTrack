@@ -59,7 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.meditrack.DBHelper
-import com.example.meditrack.navigation.NotificationHelper
+import com.example.meditrack.Notification.NotificationHelper
 import kotlinx.coroutines.delay
 import java.util.Calendar
 

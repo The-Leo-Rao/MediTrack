@@ -31,7 +31,7 @@ class VitalChartView @JvmOverloads constructor(
 
     private var baseT: Long = 0L
 
-    private val timeFmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    private val timeFmt = SimpleDateFormat("dd-MMM HH:mm a", Locale.getDefault())
 
     init {
         description.isEnabled = false
@@ -44,13 +44,19 @@ class VitalChartView @JvmOverloads constructor(
             override fun getFormattedValue(value: Float): String =
                 timeFmt.format(Date(baseT + (value * 1000).toLong()))
         }
+
+        xAxis.textColor = Color.WHITE
+        axisLeft.textColor = Color.WHITE
+        legend.textColor = Color.WHITE
+        xAxis.labelRotationAngle = -45f
     }
 
     fun setData(
         type: VitalType,
-        points: List<GraphPoint>
+        points: List<GraphPoint>,
+        follow: Boolean = false
     ) {
-        render(type, points, false)
+        render(type, points, follow)
     }
 
     private fun render(type: VitalType, points: List<GraphPoint>, follow: Boolean) {
@@ -77,10 +83,16 @@ class VitalChartView @JvmOverloads constructor(
 
         data = LineData(sets)
         notifyDataSetChanged()
-        if (follow) {
-            setVisibleXRangeMaximum(60f) // ~60 s window
-            moveViewToX(primary.last().x)  // sweep to newest
-        } else {
+        if (follow && points.size >= 5) {
+            val startX = primary[primary.size - 5].x
+            val endX = primary.last().x
+
+            setVisibleXRangeMaximum(endX - startX)
+            moveViewToX(endX)
+        }
+        else if (follow) {
+            moveViewToX(primary.last().x)
+        }else {
             fitScreen()
         }
         invalidate()

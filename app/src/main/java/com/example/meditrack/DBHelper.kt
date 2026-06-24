@@ -5,7 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import com.example.meditrack.navigation.scheduleAlarm
+import com.example.meditrack.Notification.scheduleAlarm
 
 data class Record(
     val id: Int,
@@ -137,7 +137,7 @@ class DBHelper(private val context: Context) :
 
         scheduleAlarm(
             context,
-            id.toInt(),
+            id.toInt()* 10 + 1,
             t1,
             med,
             dose
@@ -146,7 +146,7 @@ class DBHelper(private val context: Context) :
         if(t2.toInt()!=0){
             scheduleAlarm(
                 context,
-                id.toInt(),
+                id.toInt()* 10 + 2,
                 t2,
                 med,
                 dose
@@ -210,5 +210,21 @@ class DBHelper(private val context: Context) :
         }
         cursor.close()
         return data
+    }
+
+    fun setAVital(type: String,val1: Double,val2: Double,unit: String,timestamp: Long,note: String){
+
+        val db=readableDatabase
+
+        val entry= ContentValues().apply{
+            put("type",type)
+            put("val1",val1)
+            put("val2",val2)
+            put("unit",unit)
+            put("timestamp",timestamp)
+            put("note",note)
+        }
+
+        db.insert("vitalsData",null,entry)
     }
 }
