@@ -1,4 +1,4 @@
-package com.example.meditrack
+package com.example.meditrack.navigation
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.meditrack.NotificationHelper
+import com.example.meditrack.navigation.NotificationHelper
 import kotlinx.coroutines.delay
 
 @Composable
