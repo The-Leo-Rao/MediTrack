@@ -227,4 +227,134 @@ class DBHelper(private val context: Context) :
 
         db.insert("vitalsData",null,entry)
     }
+
+
+
+
+
+
+
+
+
+
+    fun seedDemoVitals(
+        daysBack: Int = 30,
+        readingsPerDayPerType: Int = 4
+    ) {
+        val db = writableDatabase
+        writableDatabase.delete("vitalsData", null, null)
+        val dayMs = 24L * 60 * 60 * 1000
+        val hourMs = 60L * 60 * 1000
+        val now = System.currentTimeMillis()
+
+        db.beginTransaction()
+        try {
+            for (dayOffset in 0 until daysBack) {
+                val dayStart = now - (dayOffset * dayMs)
+
+                repeat(readingsPerDayPerType) { slot ->
+                    val timestamp =
+                        startOfDay(dayStart) +
+                                (8L + slot * 4L) * hourMs +
+                                (0..59).random() * 60L * 1000L
+
+                    insertVitalRow(
+                        type = "HEART RATE",
+                        val1 = (60..110).random().toDouble(),
+                        val2 = 0.0,
+                        unit = "bpm",
+                        timestamp = timestamp,
+                        note = "Test",
+                        db = db
+                    )
+
+                    insertVitalRow(
+                        type = "WEIGHT",
+                        val1 = (68..74).random().toDouble(),
+                        val2 = 0.0,
+                        unit = "kg",
+                        timestamp = timestamp,
+                        note = "Test",
+                        db = db
+                    )
+
+                    insertVitalRow(
+                        type = "BLOOD PRESSURE",
+                        val1 = (100..150).random().toDouble(),
+                        val2 = (60..95).random().toDouble(),
+                        unit = "mmHg",
+                        timestamp = timestamp + 5 * 60 * 1000L,
+                        note = "Test",
+                        db = db
+                    )
+
+                    insertVitalRow(
+                        type = "SPO2",
+                        val1 = (92..100).random().toDouble(),
+                        val2 = 0.0,
+                        unit = "%",
+                        timestamp = timestamp + 10 * 60 * 1000L,
+                        note = "Test",
+                        db = db
+                    )
+
+                    insertVitalRow(
+                        type = "BODY TEMPERATURE",
+                        val1 = ((365..390).random() / 10.0),
+                        val2 = 0.0,
+                        unit = "°C",
+                        timestamp = timestamp + 15 * 60 * 1000L,
+                        note = "Test",
+                        db = db
+                    )
+
+                    insertVitalRow(
+                        type = "BLOOD SUGAR",
+                        val1 = (70..220).random().toDouble(),
+                        val2 = 0.0,
+                        unit = "mg/dL",
+                        timestamp = timestamp + 20 * 60 * 1000L,
+                        note = "Test",
+                        db = db
+                    )
+                }
+            }
+
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    private fun insertVitalRow(
+        type: String,
+        val1: Double,
+        val2: Double,
+        unit: String,
+        timestamp: Long,
+        note: String?,
+        db: android.database.sqlite.SQLiteDatabase
+    ) {
+        val values = android.content.ContentValues().apply {
+            put("type", type)
+            put("val1", val1)
+            put("val2", val2)
+            put("unit", unit)
+            put("timestamp", timestamp)
+            put("note", note)
+        }
+
+        db.insert("vitalsData", null, values)
+    }
+
+    private fun startOfDay(timeInMillis: Long): Long {
+        val cal = java.util.Calendar.getInstance().apply {
+            this.timeInMillis = timeInMillis
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }
+        return cal.timeInMillis
+    }
 }

@@ -79,7 +79,7 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocScreen(navController: NavController){
-
+    var dummy by remember { mutableStateOf(false) }
     val context = LocalContext.current
     NotificationHelper(context).createChannel()
 
@@ -156,7 +156,6 @@ fun DocScreen(navController: NavController){
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar ={
             Column{
-
                 var type by remember { mutableStateOf("") }
                 var content by remember { mutableStateOf("") }
 
@@ -360,6 +359,7 @@ fun DocScreen(navController: NavController){
                                 Button(
                                     onClick = {
                                         dbHelper.AddRecord(type,note, System.currentTimeMillis())
+                                        dummy=!dummy
                                         showDialog=false
                                         newNote=false
                                     },
@@ -379,6 +379,7 @@ fun DocScreen(navController: NavController){
                                 onClick = {
                                     val date=state.selectedDateMillis.toString()
                                     dbHelper.AddRecord(type,date, System.currentTimeMillis())
+                                    dummy=!dummy
                                     showDialog=false
                                     followup=false
                                 }){Text("Log",style = MaterialTheme.typography.labelSmall)}
@@ -432,6 +433,7 @@ fun DocScreen(navController: NavController){
                                 Button(
                                     onClick = {
                                         dbHelper.AddRecord(type,(note+sever.toString()), System.currentTimeMillis())
+                                        dummy=!dummy
                                         showDialog=false
                                         newSymptom=false
                                     },
@@ -472,6 +474,7 @@ fun DocScreen(navController: NavController){
                                 Button(
                                     onClick = {
                                         dbHelper.AddRecord(type,note, System.currentTimeMillis())
+                                        dummy=!dummy
                                         showDialog=false
                                         newPrescription=false
                                     },
@@ -507,6 +510,7 @@ fun DocScreen(navController: NavController){
                                     file.absolutePath,
                                     System.currentTimeMillis()
                                 )
+                                dummy=!dummy
                                 showDialog=false
                                 imageupload=false
                             }
@@ -539,6 +543,9 @@ fun DocScreen(navController: NavController){
     ){padding->
 
         Box(modifier = Modifier.fillMaxSize()) {
+            dummy=dummy
+
+            val records =dbHelper.getAll()
 
             LazyColumn(
                 modifier = Modifier
@@ -546,7 +553,6 @@ fun DocScreen(navController: NavController){
                     .padding(padding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val records = dbHelper.getAll()
 
                 item { Spacer(Modifier.height(15.dp)) }
 
@@ -683,7 +689,7 @@ fun DocScreen(navController: NavController){
                 if(deleted!=0){
                     delAlert=false
                 }
-            }){Text("Confirm",style = MaterialTheme.typography.labelSmall)}},
+            }){Text("Confirm",style = MaterialTheme.typography.labelSmall, color = Color.Black)}},
             title = {Text("Delete Record?",style = MaterialTheme.typography.bodyMedium)}
         )
     }

@@ -58,12 +58,16 @@ import com.example.meditrack.DBHelper
 import com.example.meditrack.Notification.NotificationHelper
 import kotlinx.coroutines.delay
 import androidx.compose.material3.Button
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import com.example.meditrack.Vital
 import com.example.meditrack.data.VitalType
 import com.example.meditrack.graph.GraphPoint
 import com.example.meditrack.ui.VitalChartView
+import java.util.Calendar
 
 @Composable
 fun VitalScreen(navController: NavController){
@@ -157,6 +161,7 @@ fun VitalScreen(navController: NavController){
         var weight by remember { mutableStateOf(false) }
         var hRate by remember { mutableStateOf(false) }
         var sugar by remember { mutableStateOf(false) }
+        var monthly by remember { mutableStateOf(false) }
 
         LaunchedEffect(pressed) {
             if (pressed) {
@@ -404,13 +409,53 @@ fun VitalScreen(navController: NavController){
 
                 val data = dbHelper.getAVital(type)
 
-                val points = data.map {
-                    GraphPoint(
-                        t = it.timestamp,
-                        value = it.val1,
-                        value2 = it.val2
-                    )
+                val monthStart = Calendar.getInstance().apply {
+                    set(Calendar.DAY_OF_MONTH, 1)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+
+                val weekStart = Calendar.getInstance().apply {
+                    firstDayOfWeek = Calendar.MONDAY
+                    set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+
+                val filtered = if (monthly) {
+                    data.filter { it.timestamp >= monthStart }
+                } else {
+                    data.filter { it.timestamp >= weekStart }
                 }
+
+                val points = filtered
+                    .groupBy { vital ->
+
+                        val cal = Calendar.getInstance().apply {
+                            timeInMillis = vital.timestamp
+
+                            set(Calendar.HOUR_OF_DAY, 0)
+                            set(Calendar.MINUTE, 0)
+                            set(Calendar.SECOND, 0)
+                            set(Calendar.MILLISECOND, 0)
+                        }
+
+                        cal.timeInMillis
+                    }
+                    .map { (dayStart, records) ->
+                        GraphPoint(
+                            t = dayStart,
+                            value = records.map { it.val1 }.average(),
+                            value2 = records.map { it.val2 }.average()
+                        )
+                    }
+                    .sortedBy { it.t }
+
 
                 val vitalType = when (type) {
                     "HEART RATE" -> VitalType.HEART_RATE
@@ -430,17 +475,41 @@ fun VitalScreen(navController: NavController){
                             .padding(vertical = 15.dp, horizontal = 15.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ){
+
+                        Row(verticalAlignment = Alignment.CenterVertically){
+                            Text("Weekly", style = MaterialTheme.typography.bodyMedium)
+                            Spacer(Modifier.width(5.dp))
+                            Switch(
+                                checked = monthly,
+                                onCheckedChange = { monthly = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = MaterialTheme.colorScheme.primary,
+                                )
+                            )
+                            Spacer(Modifier.width(5.dp))
+                            Text("Monthly", style = MaterialTheme.typography.bodyMedium)
+                        }
+
+                        Spacer(Modifier.height(10.dp))
+
                         AndroidView(
                             factory = { context ->
                                 VitalChartView(context)
                             },
                             update = { chart ->
-                                chart.setData(vitalType, points, follow = true)
+                                chart.setData(vitalType, points, follow = false)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(300.dp)
                         )
+
+                        Spacer(Modifier.height(25.dp))
+
+                        Text("pinch to zoom, scroll",style= MaterialTheme.typography.labelSmall)
 
                         Spacer(Modifier.height(25.dp))
 

@@ -460,7 +460,7 @@ fun reminderScreen(navController: NavController){
                 if(deleted!=0){
                     delRem=false
                 }
-            }){Text("Confirm",style = MaterialTheme.typography.labelSmall)}},
+            }){Text("Confirm",style = MaterialTheme.typography.labelSmall, color = Color.Black)}},
             title = {Text("Delete Record?",style = MaterialTheme.typography.bodyMedium)}
         )
     }

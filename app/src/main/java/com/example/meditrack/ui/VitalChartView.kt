@@ -31,7 +31,7 @@ class VitalChartView @JvmOverloads constructor(
 
     private var baseT: Long = 0L
 
-    private val timeFmt = SimpleDateFormat("dd-MMM HH:mm a", Locale.getDefault())
+    private val timeFmt = SimpleDateFormat("dd-MMM", Locale.getDefault())
 
     init {
         description.isEnabled = false

@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.rounded.AcUnit
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MedicalServices
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.AlertDialog
@@ -46,12 +49,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import com.example.meditrack.DBHelper
 import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun profileScreen(navController: NavController){
-
+    var showInfo by remember { mutableStateOf(false) }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar ={
@@ -499,6 +505,55 @@ fun profileScreen(navController: NavController){
                     )
                 }
             }
+
+            Button(
+                onClick = {showInfo=true},
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 20.dp,top=30.dp),
+                    shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0,0,0,0)
+                )
+            ) {Icon(Icons.Rounded.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)}
         }
+    }
+
+    if(showInfo){
+        val context= LocalContext.current
+        val dbHelper= DBHelper(context)
+        AlertDialog(
+            onDismissRequest = {showInfo=false},
+            confirmButton = {},
+            title = {Text("App Info",style= MaterialTheme.typography.bodyLarge)},
+            text={
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .height(250.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    item{Text("MediTrack is a personal health management application designed to help users record, monitor, and visualize important health metrics over time.",style= MaterialTheme.typography.bodyMedium)}
+
+                    item{Spacer(Modifier.height(25.dp))}
+
+                    item{Text("The SOS feature is designed to help users quickly notify their emergency contact. for activating SOS, press and hold the SOS button for 3 seconds. A message will be automatically sent to your emergency contact with your location and health data")}
+
+                    item{Spacer(Modifier.height(25.dp))}
+
+                    item{Text("Disclaimer", style = MaterialTheme.typography.titleLarge,modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)}
+
+                    item{Spacer(Modifier.height(15.dp))}
+
+                    item{Text("MediTrack is intended for informational and personal record-keeping purposes only. The application does not provide medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional regarding medical concerns or decisions.")}
+
+                    item{Spacer(Modifier.height(15.dp))}
+
+                    item{Button(onClick = { dbHelper.seedDemoVitals() }) {
+                        Text("Seed Test Data", style = MaterialTheme.typography.labelSmall)
+                    }}
+                }
+            }
+        )
     }
 }

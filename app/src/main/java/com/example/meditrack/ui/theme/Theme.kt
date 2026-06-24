@@ -25,8 +25,8 @@ private val LightColorScheme = lightColorScheme(
     background = Storm,
     surface = Teal,
     primary = Peach,
-    onPrimary = Storm,
-    onSurface = Storm,
+    onPrimary = CharcoalBlue,
+    onSurface = CharcoalBlue,
     secondary = PurpleGrey40,
     tertiary = Pink40
 
