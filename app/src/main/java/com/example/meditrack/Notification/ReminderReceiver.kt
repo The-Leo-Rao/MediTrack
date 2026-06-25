@@ -9,7 +9,9 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.meditrack.DBHelper
 import com.example.meditrack.R
+import java.util.Calendar
 
 class ReminderReceiver : BroadcastReceiver() {
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
@@ -17,11 +19,17 @@ class ReminderReceiver : BroadcastReceiver() {
         context: Context,
         intent: Intent
     ) {
+        val alarmId = intent.getIntExtra("id", -1)
 
-        val med =
-            intent.getStringExtra("med") ?: ""
-        val dose =
-            intent.getStringExtra("dose") ?: ""
+        val reminderId = alarmId / 10
+        val alarmNumber = alarmId % 10
+
+        val med = intent.getStringExtra("med") ?: ""
+        val dose = intent.getStringExtra("dose") ?: ""
+
+        val db = DBHelper(context)
+        val reminder = db.getReminder(reminderId)
+
         context.startService(
             Intent(
                 context,
@@ -63,5 +71,48 @@ class ReminderReceiver : BroadcastReceiver() {
         NotificationManagerCompat
             .from(context)
             .notify(1001, notification)
+
+        if (reminder != null) {
+
+            val calendar = Calendar.getInstance()
+
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+
+            if (alarmNumber == 1) {
+
+                calendar.set(
+                    Calendar.HOUR_OF_DAY,
+                    reminder.hour1
+                )
+
+                calendar.set(
+                    Calendar.MINUTE,
+                    reminder.minute1
+                )
+
+            } else {
+
+                calendar.set(
+                    Calendar.HOUR_OF_DAY,
+                    reminder.hour2
+                )
+
+                calendar.set(
+                    Calendar.MINUTE,
+                    reminder.minute2
+                )
+            }
+
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+
+            scheduleAlarm(
+                context,
+                alarmId,
+                calendar.timeInMillis,
+                med,
+                dose
+            )
+        }
     }
 }

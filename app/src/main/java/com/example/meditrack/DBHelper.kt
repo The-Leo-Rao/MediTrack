@@ -5,7 +5,9 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.example.meditrack.Notification.cancelAlarm
 import com.example.meditrack.Notification.scheduleAlarm
+import java.util.Calendar
 
 data class Record(
     val id: Int,
@@ -17,8 +19,10 @@ data class Reminder(
     val id: Int,
     val med: String,
     val dose: String,
-    val time1: Long,
-    val time2: Long
+    val hour1: Int,
+    val minute1: Int,
+    val hour2: Int,
+    val minute2: Int
 )
 data class Vital(
     val id: Int,
@@ -53,12 +57,16 @@ class DBHelper(private val context: Context) :
         Log.d("DB", "Creating Reminders")
         db.execSQL(
             """CREATE TABLE reminders(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                medicine TEXT,
-                dose TEXT,
-                time INTEGER,
-                timetwo INTEGER
-            )"""
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    medicine TEXT,
+                    dose TEXT,
+                
+                    hour1 INTEGER,
+                    minute1 INTEGER,
+                
+                    hour2 INTEGER,
+                    minute2 INTEGER
+                )"""
         )
         Log.d("DB", "Created Reminders")
         Log.d("DB", "Creating Vitals")
@@ -90,7 +98,7 @@ class DBHelper(private val context: Context) :
 
         db.insert("records",null,entry)
     }
-    fun getAll(): List<Record>{
+    fun getAllRec(): List<Record>{
         val records = mutableListOf<Record>()
         val db=readableDatabase
 
@@ -122,14 +130,45 @@ class DBHelper(private val context: Context) :
     }
 
 
-    fun AddReminder(med: String,dose: String,t1: Long,t2:Long){
+    fun AddReminder(
+        med: String,
+        dose: String,
+
+        hour1: Int,
+        minute1: Int,
+
+        hour2: Int,
+        minute2: Int
+    ){
+        fun nextOccurrence(
+            hour: Int,
+            minute: Int
+        ): Long {
+
+            val now = Calendar.getInstance()
+
+            val target = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, hour)
+                set(Calendar.MINUTE, minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+
+                if (before(now)) {
+                    add(Calendar.DAY_OF_YEAR, 1)
+                }
+            }
+
+            return target.timeInMillis
+        }
 
         val db=writableDatabase
 
         val entry= ContentValues().apply{
             put("medicine",med)
-            put("time",t1)
-            put("timetwo",t2)
+            put("hour1",hour1)
+            put("minute1",minute1)
+            put("hour2",hour2)
+            put("minute2",minute2)
             put("dose",dose)
         }
 
@@ -138,46 +177,84 @@ class DBHelper(private val context: Context) :
         scheduleAlarm(
             context,
             id.toInt()* 10 + 1,
-            t1,
+            nextOccurrence(hour1, minute1),
             med,
             dose
         )
 
-        if(t2.toInt()!=0){
+        if (hour2 != 0 || minute2 != 0) {
+
             scheduleAlarm(
                 context,
-                id.toInt()* 10 + 2,
-                t2,
+                id.toInt() * 10 + 2,
+                nextOccurrence(hour2, minute2),
                 med,
                 dose
             )
         }
     }
-    fun getAllRem(): List<Reminder>{
+    fun getReminder(id: Int): Reminder? {
+
+        val db = readableDatabase
+
+        val cursor = db.rawQuery(
+            "SELECT * FROM reminders WHERE id=?",
+            arrayOf(id.toString())
+        )
+
+        var reminder: Reminder? = null
+
+        if (cursor.moveToFirst()) {
+
+            reminder = Reminder(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                med = cursor.getString(cursor.getColumnIndexOrThrow("medicine")),
+                dose = cursor.getString(cursor.getColumnIndexOrThrow("dose")),
+
+                hour1 = cursor.getInt(cursor.getColumnIndexOrThrow("hour1")),
+                minute1 = cursor.getInt(cursor.getColumnIndexOrThrow("minute1")),
+
+                hour2 = cursor.getInt(cursor.getColumnIndexOrThrow("hour2")),
+                minute2 = cursor.getInt(cursor.getColumnIndexOrThrow("minute2"))
+            )
+        }
+
+        cursor.close()
+
+        return reminder
+    }
+
+    fun getAllRem(): List<Reminder> {
         val reminders = mutableListOf<Reminder>()
-        val db=readableDatabase
+        val db = readableDatabase
 
-        val cursor=db.rawQuery("select * from reminders",null)
+        val cursor = db.rawQuery("SELECT * FROM reminders", null)
 
-        with(cursor){
-            while(moveToNext()){
+        with(cursor) {
+            while (moveToNext()) {
                 reminders.add(
                     Reminder(
-                        id=getInt(getColumnIndexOrThrow("id")),
-                        med=getString(getColumnIndexOrThrow("medicine")),
-                        time1=getLong(getColumnIndexOrThrow("time")),
-                        time2=getLong(getColumnIndexOrThrow("timetwo")),
-                        dose=getString(getColumnIndexOrThrow("dose"))
+                        id = getInt(getColumnIndexOrThrow("id")),
+                        med = getString(getColumnIndexOrThrow("medicine")),
+                        dose = getString(getColumnIndexOrThrow("dose")),
+
+                        hour1 = getInt(getColumnIndexOrThrow("hour1")),
+                        minute1 = getInt(getColumnIndexOrThrow("minute1")),
+
+                        hour2 = getInt(getColumnIndexOrThrow("hour2")),
+                        minute2 = getInt(getColumnIndexOrThrow("minute2"))
                     )
                 )
             }
             close()
         }
+
         return reminders
     }
     fun delRem(id: Int): Int{
         val db=writableDatabase
 
+        cancelAlarm(context, id)
         return db.delete(
             "reminders",
             "id=?",

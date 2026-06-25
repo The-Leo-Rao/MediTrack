@@ -545,7 +545,7 @@ fun DocScreen(navController: NavController){
         Box(modifier = Modifier.fillMaxSize()) {
             dummy=dummy
 
-            val records =dbHelper.getAll()
+            val records =dbHelper.getAllRec()
 
             LazyColumn(
                 modifier = Modifier

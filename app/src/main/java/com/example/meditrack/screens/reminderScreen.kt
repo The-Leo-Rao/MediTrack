@@ -79,8 +79,11 @@ fun reminderScreen(navController: NavController){
 
     var presc by remember { mutableStateOf("") }
     var dose by remember { mutableStateOf("") }
-    var time1: Long by remember { mutableStateOf(0) }
-    var time2: Long by remember { mutableStateOf(0) }
+    var hour1 by remember { mutableStateOf(0) }
+    var minute1 by remember { mutableStateOf(0) }
+
+    var hour2 by remember { mutableStateOf(0) }
+    var minute2 by remember { mutableStateOf(0) }
     var idToDel by remember { mutableStateOf(0) }
 
     var prescLabel by remember { mutableStateOf("Prescription") }
@@ -224,10 +227,12 @@ fun reminderScreen(navController: NavController){
                             Spacer(Modifier.height(15.dp))
 
                             Text(
-                                "At- " + reminder.time1.toTime().substring(7)
+                                "At- " + String.format("%02d:%02d", reminder.hour1, reminder.minute1)
                             )
-                            if (reminder.time2.toInt() != 0) {
-                                Text("and " + reminder.time2.toTime().substring(7))
+                            if (reminder.hour2 != 0 || reminder.minute2 != 0) {
+                                Text(
+                                    "and ${String.format("%02d:%02d", reminder.hour2, reminder.minute2)}"
+                                )
                             }
                         }
                     }
@@ -286,11 +291,13 @@ fun reminderScreen(navController: NavController){
                             dose.isBlank()->{doseLabel="Dosage cannot be empty"}
 
                             else->{
-                                dbHelper.AddReminder(presc, dose,time1,time2)
+                                dbHelper.AddReminder(presc, dose,hour1,minute1,hour2,minute2)
                                 presc = ""
                                 dose = ""
-                                time1 = 0L
-                                time2 = 0L
+                                hour1=0
+                                hour2=0
+                                minute2=0
+                                minute1=0
                                 multi = false
                                 prescLabel = "Prescription"
                                 doseLabel = "Enter dosage"
@@ -387,7 +394,8 @@ fun reminderScreen(navController: NavController){
                             set(Calendar.MILLISECOND, 0)
                         }
 
-                        time1 = calendar.timeInMillis
+                        hour1 = timePickerState.hour
+                        minute1 = timePickerState.minute
                         first = false
                     }
                 ) {
@@ -427,7 +435,8 @@ fun reminderScreen(navController: NavController){
                             set(Calendar.MILLISECOND, 0)
                         }
 
-                        time2 = calendar.timeInMillis
+                        hour2 = timePickerState.hour
+                        minute2 = timePickerState.minute
                         second = false
                     }
                 ) {

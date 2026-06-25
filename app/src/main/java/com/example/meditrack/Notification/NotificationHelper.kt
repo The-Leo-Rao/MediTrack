@@ -107,3 +107,34 @@ fun scheduleAlarm(
         pendingIntent
     )
 }
+
+fun cancelAlarm(
+    context: Context,
+    reminderId: Int
+) {
+
+    val alarmManager =
+        context.getSystemService(Context.ALARM_SERVICE)
+                as AlarmManager
+
+    for (alarmNo in 1..2) {
+
+        val alarmId = reminderId * 10 + alarmNo
+
+        val intent = Intent(
+            context,
+            ReminderReceiver::class.java
+        )
+
+        val pendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                alarmId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or
+                        PendingIntent.FLAG_IMMUTABLE
+            )
+
+        alarmManager.cancel(pendingIntent)
+    }
+}

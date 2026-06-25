@@ -463,6 +463,7 @@ fun VitalScreen(navController: NavController){
                     "SPO2" -> VitalType.SPO2
                     "BODY TEMPERATURE" -> VitalType.TEMPERATURE
                     "BLOOD SUGAR"-> VitalType.BLOOD_SUGAR
+                    "WEIGHT"-> VitalType.WEIGHT
                     else -> VitalType.HEART_RATE
                 }
 

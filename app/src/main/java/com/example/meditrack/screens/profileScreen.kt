@@ -510,7 +510,7 @@ fun profileScreen(navController: NavController){
                 onClick = {showInfo=true},
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(end = 20.dp,top=30.dp),
+                    .padding(end = 20.dp,top=40.dp),
                     shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0,0,0,0)
