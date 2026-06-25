@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.meditrack.Notification.cancelAlarm
 import com.example.meditrack.Notification.scheduleAlarm
+import com.example.meditrack.clinical.VitalStatus
+import com.example.meditrack.data.VitalEvent
+import com.example.meditrack.data.VitalType
 import java.util.Calendar
 
 data class Record(
@@ -82,6 +85,18 @@ class DBHelper(private val context: Context) :
             )"""
         )
         Log.d("DB", "Created Vitals")
+
+        db.execSQL(
+            """CREATE TABLE vital_events(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                type TEXT,
+                status TEXT,
+                startTimestamp INTEGER,
+                endTimestamp INTEGER,
+                extremeValue REAL,
+                extremeValue2 REAL
+            )"""
+        )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldV: Int, newV: Int) {
@@ -264,24 +279,49 @@ class DBHelper(private val context: Context) :
 
 
     fun getAVital(specific: String): List<Vital>{
-        val data=mutableListOf<Vital>()
-        val db=readableDatabase
-
-        val cursor=db.rawQuery(
-            "SELECT * FROM vitalsData WHERE type=?",
+        return queryVitals(
+            "SELECT * FROM vitalsData WHERE type=? ORDER BY timestamp ASC",
             arrayOf(specific)
         )
+    }
 
+
+    fun getVitalsInRange(type: String, start: Long, end: Long): List<Vital> {
+        return queryVitals(
+            "SELECT * FROM vitalsData WHERE type=? AND timestamp BETWEEN ? AND ? ORDER BY timestamp ASC",
+            arrayOf(type, start.toString(), end.toString())
+        )
+    }
+
+
+    fun getLatestVital(type: String): Vital? {
+        return queryVitals(
+            "SELECT * FROM vitalsData WHERE type=? ORDER BY timestamp DESC LIMIT 1",
+            arrayOf(type)
+        ).firstOrNull()
+    }
+
+
+    fun getVitalCount(): Int {
+        val cursor = readableDatabase.rawQuery("SELECT COUNT(*) FROM vitalsData", null)
+        val count = if (cursor.moveToFirst()) cursor.getInt(0) else 0
+        cursor.close()
+        return count
+    }
+
+    private fun queryVitals(sql: String, args: Array<String>): List<Vital> {
+        val data = mutableListOf<Vital>()
+        val cursor = readableDatabase.rawQuery(sql, args)
         while (cursor.moveToNext()) {
             data.add(
                 Vital(
                     id = cursor.getInt(0),
                     type = cursor.getString(1),
                     val1 = cursor.getDouble(2),
-                    val2=cursor.getDouble(3),
-                    unit=cursor.getString(4),
+                    val2 = cursor.getDouble(3),
+                    unit = cursor.getString(4),
                     timestamp = cursor.getLong(5),
-                    note=cursor.getString(6)
+                    note = cursor.getString(6) ?: ""
                 )
             )
         }
@@ -289,7 +329,7 @@ class DBHelper(private val context: Context) :
         return data
     }
 
-    fun setAVital(type: String,val1: Double,val2: Double,unit: String,timestamp: Long,note: String){
+    fun setAVital(type: String,val1: Double,val2: Double,unit: String,timestamp: Long,note: String): Long{
 
         val db=readableDatabase
 
@@ -302,11 +342,55 @@ class DBHelper(private val context: Context) :
             put("note",note)
         }
 
-        db.insert("vitalsData",null,entry)
+        return db.insert("vitalsData",null,entry)
     }
 
+    fun addVitalEvent(
+        type: String,
+        status: String,
+        startTimestamp: Long,
+        endTimestamp: Long,
+        extremeValue: Double,
+        extremeValue2: Double?
+    ): Long {
+        val db = writableDatabase
+        val entry = ContentValues().apply {
+            put("type", type)
+            put("status", status)
+            put("startTimestamp", startTimestamp)
+            put("endTimestamp", endTimestamp)
+            put("extremeValue", extremeValue)
+            put("extremeValue2", extremeValue2)
+        }
+        return db.insert("vital_events", null, entry)
+    }
 
+    fun getRecentEvents(limit: Int): List<VitalEvent> {
+        return queryEvents(
+            "SELECT * FROM vital_events ORDER BY endTimestamp DESC LIMIT ?",
+            arrayOf(limit.toString())
+        )
+    }
 
+    private fun queryEvents(sql: String, args: Array<String>): List<VitalEvent> {
+        val events = mutableListOf<VitalEvent>()
+        val cursor = readableDatabase.rawQuery(sql, args)
+        while (cursor.moveToNext()) {
+            events.add(
+                VitalEvent(
+                    id = cursor.getLong(0),
+                    type = VitalType.valueOf(cursor.getString(1)),
+                    status = VitalStatus.valueOf(cursor.getString(2)),
+                    startTimestamp = cursor.getLong(3),
+                    endTimestamp = cursor.getLong(4),
+                    extremeValue = cursor.getDouble(5),
+                    extremeValue2 = if (cursor.isNull(6)) null else cursor.getDouble(6),
+                )
+            )
+        }
+        cursor.close()
+        return events
+    }
 
 
 
