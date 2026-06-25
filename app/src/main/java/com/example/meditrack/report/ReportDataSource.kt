@@ -43,7 +43,7 @@ object ReportDataSource {
             }
         }
 
-        val records = db.getAllRec().sortedByDescending { it.timestamp }
+        val records = db.getAllRec().sortedBy { it.timestamp }
         val reminders = db.getAllRem()
 
         ReportContent(
@@ -110,13 +110,16 @@ object ReportDataSource {
         fun field(key: String, default: String): String =
             doc?.getString(key)?.takeIf { it.isNotBlank() } ?: default
 
+        val number = doc?.getString("Emergency")
         return PatientInfo(
             name = field("name", user.email?.substringBefore("@") ?: "Patient"),
             bloodGroup = field("Blood-Group", "Not provided"),
             allergies = field("Allergies", "None reported"),
             chronic = field("Chronic illnesses", "None reported"),
-            emergency = doc?.getString("Emergency")?.takeIf { it.isNotBlank() }?.let { "+91 $it" }
-                ?: "Not provided",
+            emergency = if (!number.isNullOrBlank())
+                "+91 ******${number.takeLast(4)}"
+            else
+                "Not provided"
         )
     }
 }

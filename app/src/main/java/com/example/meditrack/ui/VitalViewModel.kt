@@ -48,9 +48,6 @@ class VitalViewModel(app: Application) : AndroidViewModel(app) {
 
     private var monitoring = false
 
-    init {
-        startMonitoring()
-    }
 
     // ── Control ────────────────────────────────────────────────────────────────
 
@@ -67,6 +64,17 @@ class VitalViewModel(app: Application) : AndroidViewModel(app) {
             monitor.stop()
         }
     }
+
+    fun toggleMonitoring() {
+        if (monitoring) {
+            stopMonitoring()
+        } else {
+            startMonitoring()
+        }
+    }
+
+    val isMonitoring: Boolean
+        get() = monitoring
 
     // ── Live (real-time, in-memory) ────────────────────────────────────────────
 

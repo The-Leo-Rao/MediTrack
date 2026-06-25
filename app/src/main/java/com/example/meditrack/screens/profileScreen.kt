@@ -19,6 +19,8 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MedicalServices
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,12 +53,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.meditrack.DBHelper
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.meditrack.ui.VitalViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun profileScreen(navController: NavController){
+    val vm = vitalViewModel()
     var showInfo by remember { mutableStateOf(false) }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -185,8 +190,13 @@ fun profileScreen(navController: NavController){
                         modifier = Modifier.padding(5.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Name: $name")
-                        Spacer(Modifier.weight(1f))
+                        Text(
+                            "Name: $name",
+                            modifier = Modifier.weight(1f),
+                            maxLines=1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.weight(0.05f))
                         Button(onClick = { editName = true }) {
                             Icon(
                                 Icons.Default.Edit,
@@ -206,8 +216,12 @@ fun profileScreen(navController: NavController){
                         modifier = Modifier.padding(5.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Blood Group: $bloodG")
-                        Spacer(Modifier.weight(1f))
+                        Text(
+                            "Blood Group: $bloodG",
+                            modifier = Modifier.weight(1f),
+                            maxLines=1,
+                            overflow = TextOverflow.Ellipsis)
+                        Spacer(Modifier.weight(0.5f))
                         Button(onClick = { editBlood = true }) {
                             Icon(
                                 Icons.Default.Edit,
@@ -227,8 +241,12 @@ fun profileScreen(navController: NavController){
                         modifier = Modifier.padding(5.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Chronic Illnesses: $chronic")
-                        Spacer(Modifier.weight(1f))
+                        Text(
+                            "Chronic Illnesses: $chronic",
+                            modifier = Modifier.weight(1f),
+                            maxLines=1,
+                            overflow = TextOverflow.Ellipsis)
+                        Spacer(Modifier.weight(0.05f))
                         Button(onClick = { editChronic = true }) {
                             Icon(
                                 Icons.Default.Edit,
@@ -248,8 +266,13 @@ fun profileScreen(navController: NavController){
                         modifier = Modifier.padding(5.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Allergies: $allergies")
-                        Spacer(Modifier.weight(1f))
+                        Text(
+                            "Allergies: $allergies",
+                            modifier = Modifier.weight(1f),
+                            maxLines=1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.weight(0.05f))
                         Button(onClick = { editAllergies = true }) {
                             Icon(
                                 Icons.Default.Edit,
@@ -269,8 +292,13 @@ fun profileScreen(navController: NavController){
                         modifier = Modifier.padding(5.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Emergency contact: $emergency")
-                        Spacer(Modifier.weight(1f))
+                        Text(
+                            "Emergency contact: $emergency",
+                            modifier = Modifier.weight(1f),
+                            maxLines=1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.weight(0.05f))
                         Button(onClick = { editEmergency = true }) {
                             Icon(
                                 Icons.Default.Edit,
@@ -516,6 +544,7 @@ fun profileScreen(navController: NavController){
                     containerColor = Color(0,0,0,0)
                 )
             ) {Icon(Icons.Rounded.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)}
+
         }
     }
 
@@ -549,9 +578,25 @@ fun profileScreen(navController: NavController){
 
                     item{Spacer(Modifier.height(15.dp))}
 
-                    item{Button(onClick = { dbHelper.seedDemoVitals() }) {
+                    item{
+                        Button(
+                            onClick = {
+                                dbHelper.seedDemoVitals()
+                                showInfo=false}) {
                         Text("Seed Test Data", style = MaterialTheme.typography.labelSmall)
                     }}
+
+                    item{Spacer(Modifier.height(15.dp))}
+
+                    item{
+                        Button(
+                            onClick = {
+                                vm.toggleMonitoring()
+                                showInfo=false},
+                            shape = CircleShape
+                        ) {Text("Toggle live server",style = MaterialTheme.typography.labelSmall)}
+                    }
+
                 }
             }
         )

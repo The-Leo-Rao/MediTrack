@@ -153,7 +153,7 @@ object VitalsReportGenerator {
         w.spacer(8f)
 
         // 5. Current medications
-        w.sectionTitle("Current Medications")
+        w.sectionTitle("Current Medication Reminders")
         if (content.reminders.isEmpty()) {
             w.paragraph("No medication reminders set.")
         } else {
