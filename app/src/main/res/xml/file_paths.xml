@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- App-specific external files dir (getExternalFilesDir) — where reports are saved. -->
+    <external-files-path name="reports" path="." />
+    <!-- Fallback when external storage is unavailable (getFilesDir). -->
+    <files-path name="internal_reports" path="." />
+</paths>
