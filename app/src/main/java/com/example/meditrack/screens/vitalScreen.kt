@@ -349,7 +349,7 @@ private fun VitalCard(vm: VitalViewModel, type: VitalType, onClick: () -> Unit) 
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = if (v1 != null) formatVital(type, v1, v2) else "—",
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
