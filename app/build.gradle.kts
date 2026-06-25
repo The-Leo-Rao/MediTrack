@@ -54,6 +54,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     //FireBase
+    implementation("com.google.firebase:firebase-storage")
     implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")

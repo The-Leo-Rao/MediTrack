@@ -61,6 +61,7 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -68,7 +69,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.meditrack.Notification.NotificationHelper
+import com.example.meditrack.report.SOSDispatcher
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -79,8 +82,11 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocScreen(navController: NavController){
+
     var dummy by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     NotificationHelper(context).createChannel()
 
     val permissionLauncher =
@@ -145,8 +151,14 @@ fun DocScreen(navController: NavController){
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 Log.d("SOS", "Permission granted")
-                notificationHelper.CallSOS()
-                SOScalled=true
+                scope.launch {
+                    SOSDispatcher.dispatch(
+                        context = context,
+                        onDone  = { success, msg ->
+                            SOScalled = true
+                        }
+                    )
+                }
             }
             else{Log.d("SOS","Permission denied") }
         }

@@ -51,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -60,7 +61,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.meditrack.DBHelper
 import com.example.meditrack.Notification.NotificationHelper
+import com.example.meditrack.report.SOSDispatcher
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +72,7 @@ fun reminderScreen(navController: NavController){
 
     val context = LocalContext.current
     val dbHelper = DBHelper(context)
+    val scope = rememberCoroutineScope()
 
     var showDialog by remember { mutableStateOf(false) }
     var multi by remember { mutableStateOf(false) }
@@ -100,8 +104,14 @@ fun reminderScreen(navController: NavController){
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 val notificationHelper= NotificationHelper(context)
-                notificationHelper.CallSOS()
-                SOScalled=true
+                scope.launch {
+                    SOSDispatcher.dispatch(
+                        context = context,
+                        onDone  = { success, msg ->
+                            SOScalled = true
+                        }
+                    )
+                }
             }
         }
     }

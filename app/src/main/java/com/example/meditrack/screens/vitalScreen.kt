@@ -79,6 +79,7 @@ import com.example.meditrack.data.VitalType
 import com.example.meditrack.graph.GraphPoint
 import com.example.meditrack.clinical.VitalStatus
 import com.example.meditrack.report.ReportShare
+import com.example.meditrack.report.SOSDispatcher
 import com.example.meditrack.report.VitalsReportGenerator
 import com.example.meditrack.ui.VitalViewModel
 import kotlinx.coroutines.delay
@@ -132,9 +133,16 @@ fun VitalScreen(navController: NavController) {
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                NotificationHelper(context).CallSOS()
+                scope.launch {
+                    SOSDispatcher.dispatch(
+                        context = context,
+                        onDone  = { success, msg ->
+                            SOScalled = true
+                        }
+                    )
+                }
             }
-            SOScalled = true
+
         }
     }
 
