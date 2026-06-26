@@ -5,18 +5,7 @@ import com.example.meditrack.clinical.VitalStatus
 import com.example.meditrack.data.VitalEvent
 import com.example.meditrack.data.VitalType
 
-/**
- * Turns a stream of readings into clinical *events*: contiguous out-of-range
- * excursions, not per-sample noise. A doctor sees "HR critical, peak 148, 14:32:10
- * → 14:32:50" as one row instead of 40.
- *
- * Per vital type it runs a tiny state machine:
- *   NORMAL  → abnormal : open an episode, remember when it started.
- *   abnormal→ abnormal : track the worst severity and the most extreme reading.
- *   abnormal→ NORMAL   : close the episode and emit a [VitalEvent] via [persist].
- *
- * @param persist invoked when an excursion closes; wire it to the repository.
- */
+
 class VitalEventDetector(
     private val persist: suspend (VitalEvent) -> Unit,
 ) {
@@ -74,7 +63,7 @@ class VitalEventDetector(
         }
     }
 
-    /** How far outside the normal range a reading is (0 if in range), max over both values. */
+
     private fun deviation(type: VitalType, value1: Double, value2: Double?): Double {
         val t = ReferenceRanges.rangesFor(type) ?: return 0.0
         val d1 = beyond(value1, t.normalLow, t.normalHigh)

@@ -6,21 +6,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.random.Random
 
-/**
- * Fake vitals source for the demo. Emits medically believable readings that drift
- * over time (a "random walk"), so a live graph looks like a real bedside monitor
- * instead of random noise.
- *
- * Each vital ticks at its OWN native cadence ([VitalType.sampleIntervalMillis]) —
- * heart rate every second, glucose every 5 min, BP every 15 min.
- *
- * Swap this for [BleVitalSource] when real hardware is ready — the app talks only
- * to [VitalSensorSource], so nothing else changes.
- *
- * @param timeScale demo time-compression. 1.0 = real time (production). Set higher
- *        (e.g. 60.0 = an hour per minute) so slow vitals like glucose/BP visibly
- *        tick during a short demo, while keeping the real ratios between vitals.
- */
 class SimulatedVitalSource(
     private val timeScale: Double = 1.0,
 ) : VitalSensorSource {
