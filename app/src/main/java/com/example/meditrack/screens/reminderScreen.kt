@@ -41,6 +41,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -48,6 +49,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,7 +81,11 @@ fun reminderScreen(navController: NavController){
     var first by remember { mutableStateOf(false) }
     var second by remember { mutableStateOf(false) }
     var delRem by remember { mutableStateOf(false) }
+
+    var maybeSOS by remember { mutableStateOf(false) }
+    var sendingSOS by remember { mutableStateOf(false) }
     var SOScalled by remember { mutableStateOf(false) }
+    var clickCount by remember { mutableIntStateOf(0) }
 
     var presc by remember { mutableStateOf("") }
     var dose by remember { mutableStateOf("") }
@@ -94,27 +100,7 @@ fun reminderScreen(navController: NavController){
     var doseLabel by remember { mutableStateOf("Enter dosage") }
 
     var pressed by remember { mutableStateOf(false) }
-    LaunchedEffect(pressed) {
-        if (pressed) {
-            delay(3000)
-            if (
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                val notificationHelper= NotificationHelper(context)
-                scope.launch {
-                    SOSDispatcher.dispatch(
-                        context = context,
-                        onDone  = { success, msg ->
-                            SOScalled = true
-                        }
-                    )
-                }
-            }
-        }
-    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar ={
@@ -271,18 +257,7 @@ fun reminderScreen(navController: NavController){
                     .align(Alignment.TopEnd)
                     .padding(end = 20.dp)
                     .size(60.dp)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                pressed = true
-                                try {
-                                    tryAwaitRelease()
-                                } finally {
-                                    pressed = false
-                                }
-                            }
-                        )
-                    }
+                    .clickable{maybeSOS=true}
                     .background(Color(90, 30, 30), shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) { Text("SOS") }
@@ -481,6 +456,79 @@ fun reminderScreen(navController: NavController){
                 }
             }){Text("Confirm",style = MaterialTheme.typography.labelSmall, color = Color.Black)}},
             title = {Text("Delete Record?",style = MaterialTheme.typography.bodyMedium)}
+        )
+    }
+
+    if(maybeSOS){
+        AlertDialog(
+            onDismissRequest = { maybeSOS=false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        clickCount++
+
+                        if (clickCount == 5) {
+                            maybeSOS=false
+                            sendingSOS=true
+                            if (
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                val notificationHelper= NotificationHelper(context)
+                                scope.launch {
+                                    SOSDispatcher.dispatch(
+                                        context = context,
+                                        onDone  = { success, msg ->
+                                            SOScalled = true
+                                            sendingSOS=false
+                                            clickCount = 0
+                                            maybeSOS=false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text("Call SOS")
+                }
+            },
+            text={
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Click the button 5 times to call SOS", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge)
+
+                    Spacer(Modifier.height(15.dp))
+
+                    Text("Click ${5-clickCount} more times to call SOS")
+                }
+            }
+        )
+    }
+
+    if (sendingSOS) {
+        AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            dismissButton = {},
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+
+                    Spacer(Modifier.height(20.dp))
+
+                    Text(
+                        "Calling SOS...\nGetting location and preparing medical report.",
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         )
     }
 

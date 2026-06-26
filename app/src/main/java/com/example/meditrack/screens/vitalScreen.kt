@@ -55,6 +55,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -106,7 +107,11 @@ fun VitalScreen(navController: NavController) {
     val readingCount by vm.historyCount.collectAsState(initial = 0)
 
     var pressed by remember { mutableStateOf(false) }
+
+    var maybeSOS by remember { mutableStateOf(false) }
     var SOScalled by remember { mutableStateOf(false) }
+    var sendingSOS by remember { mutableStateOf(false) }
+    var clickCount by remember { mutableIntStateOf(0) }
 
     val scope = rememberCoroutineScope()
     var exporting by remember { mutableStateOf(false) }
@@ -125,27 +130,6 @@ fun VitalScreen(navController: NavController) {
         }
     }
 
-    LaunchedEffect(pressed) {
-        if (pressed) {
-            delay(3000)
-            if (
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                scope.launch {
-                    SOSDispatcher.dispatch(
-                        context = context,
-                        onDone  = { success, msg ->
-                            SOScalled = true
-                        }
-                    )
-                }
-            }
-
-        }
-    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -224,24 +208,86 @@ fun VitalScreen(navController: NavController) {
                     .align(Alignment.TopEnd)
                     .padding(top = 8.dp, end = 8.dp)
                     .size(60.dp)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                pressed = true
-                                try {
-                                    tryAwaitRelease()
-                                } finally {
-                                    pressed = false
-                                }
-                            }
-                        )
-                    }
+                    .clickable{maybeSOS=true}
                     .background(Color(90, 30, 30), shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) { Text("SOS") }
 
 
         }
+    }
+
+    if(maybeSOS){
+        AlertDialog(
+            onDismissRequest = { maybeSOS=false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        clickCount++
+
+                        if (clickCount == 5) {
+                            maybeSOS=false
+                            sendingSOS = true
+                            if (
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                val notificationHelper= NotificationHelper(context)
+                                scope.launch {
+                                    SOSDispatcher.dispatch(
+                                        context = context,
+                                        onDone  = { success, msg ->
+                                            SOScalled = true
+                                            sendingSOS=false
+                                            clickCount = 0
+                                            maybeSOS=false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text("Call SOS")
+                }
+            },
+            text={
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Click the button 5 times to call SOS", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge)
+
+                    Spacer(Modifier.height(15.dp))
+
+                    Text("Click ${5-clickCount} more times to call SOS")
+                }
+            }
+        )
+    }
+
+    if (sendingSOS) {
+        AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            dismissButton = {},
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+
+                    Spacer(Modifier.height(20.dp))
+
+                    Text(
+                        "Calling SOS...\nGetting location and preparing medical report.",
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        )
     }
 
     if (SOScalled) {

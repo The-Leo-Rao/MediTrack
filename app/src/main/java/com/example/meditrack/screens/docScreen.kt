@@ -59,8 +59,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -137,32 +139,14 @@ fun DocScreen(navController: NavController){
     val notificationHelper = NotificationHelper(context)
 
     var delAlert by remember { mutableStateOf(false) }
-    var SOScalled by remember { mutableStateOf(false) }
     var idToDel: Int by remember { mutableStateOf(0) }
 
+    var maybeSOS by remember { mutableStateOf(false) }
+    var sendingSOS by remember { mutableStateOf(false) }
+    var SOScalled by remember { mutableStateOf(false) }
+    var clickCount by remember { mutableIntStateOf(0) }
+
     var pressed by remember { mutableStateOf(false) }
-    LaunchedEffect(pressed) {
-        if (pressed) {
-            delay(3000)
-            if (
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                Log.d("SOS", "Permission granted")
-                scope.launch {
-                    SOSDispatcher.dispatch(
-                        context = context,
-                        onDone  = { success, msg ->
-                            SOScalled = true
-                        }
-                    )
-                }
-            }
-            else{Log.d("SOS","Permission denied") }
-        }
-    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -370,10 +354,14 @@ fun DocScreen(navController: NavController){
 
                                 Button(
                                     onClick = {
-                                        dbHelper.AddRecord(type,note, System.currentTimeMillis())
-                                        dummy=!dummy
-                                        showDialog=false
-                                        newNote=false
+                                        if(note.isBlank()){}
+                                        else{
+                                            dbHelper.AddRecord(type,note, System.currentTimeMillis())
+                                            dummy=!dummy
+                                            showDialog=false
+                                            newNote=false
+
+                                        }
                                     },
                                     modifier = Modifier.align(Alignment.End)){Text("Log",style = MaterialTheme.typography.labelSmall)}
 
@@ -389,12 +377,18 @@ fun DocScreen(navController: NavController){
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    val date=state.selectedDateMillis.toString()
-                                    dbHelper.AddRecord(type,date, System.currentTimeMillis())
-                                    dummy=!dummy
-                                    showDialog=false
-                                    followup=false
-                                }){Text("Log",style = MaterialTheme.typography.labelSmall)}
+                                    when{
+                                        (state.selectedDateMillis == null)->{}
+                                        else->{
+                                            val date=state.selectedDateMillis.toString()
+                                            dbHelper.AddRecord(type,date, System.currentTimeMillis())
+                                            dummy=!dummy
+                                            showDialog=false
+                                            followup=false
+                                        }
+                                    }
+                                }
+                            ){Text("Log",style = MaterialTheme.typography.labelSmall)}
                         }
                     ){DatePicker(state=state)}
                 }
@@ -437,17 +431,20 @@ fun DocScreen(navController: NavController){
                                 Slider(
                                     value = sever.toFloat(),
                                     onValueChange = {sever=it.roundToInt()},
-                                    valueRange = 0f..10f,
-                                    steps=9
+                                    valueRange = 0f..9f,
+                                    steps=8
                                 )
 
 
                                 Button(
                                     onClick = {
-                                        dbHelper.AddRecord(type,(note+sever.toString()), System.currentTimeMillis())
-                                        dummy=!dummy
-                                        showDialog=false
-                                        newSymptom=false
+                                        if(note.isBlank()){}
+                                        else{
+                                            dbHelper.AddRecord(type,(note+sever.toString()), System.currentTimeMillis())
+                                            dummy=!dummy
+                                            showDialog=false
+                                            newSymptom=false
+                                        }
                                     },
                                     modifier = Modifier.align(Alignment.End)){Text("Log",style = MaterialTheme.typography.labelSmall)}
 
@@ -485,10 +482,13 @@ fun DocScreen(navController: NavController){
 
                                 Button(
                                     onClick = {
-                                        dbHelper.AddRecord(type,note, System.currentTimeMillis())
-                                        dummy=!dummy
-                                        showDialog=false
-                                        newPrescription=false
+                                        if(note.isBlank()){}
+                                        else{
+                                            dbHelper.AddRecord(type,note, System.currentTimeMillis())
+                                            dummy=!dummy
+                                            showDialog=false
+                                            newPrescription=false
+                                        }
                                     },
                                     modifier = Modifier.align(Alignment.End)){Text("Log",style = MaterialTheme.typography.labelSmall)}
 
@@ -671,18 +671,7 @@ fun DocScreen(navController: NavController){
                     .align(Alignment.TopEnd)
                     .padding(top = 40.dp, end = 20.dp)
                     .size(60.dp)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                pressed = true
-                                try {
-                                    tryAwaitRelease()
-                                } finally {
-                                    pressed = false
-                                }
-                            }
-                        )
-                    }
+                    .clickable{maybeSOS=true}
                     .background(Color(90,30,30), shape = CircleShape),
                 contentAlignment = Alignment.Center
             ){Text("SOS")}
@@ -703,6 +692,78 @@ fun DocScreen(navController: NavController){
                 }
             }){Text("Confirm",style = MaterialTheme.typography.labelSmall, color = Color.Black)}},
             title = {Text("Delete Record?",style = MaterialTheme.typography.bodyMedium)}
+        )
+    }
+
+    if(maybeSOS){
+        AlertDialog(
+            onDismissRequest = { maybeSOS=false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        clickCount++
+
+                        if (clickCount == 5) {
+                            maybeSOS=false
+                            sendingSOS=true
+                            if (
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                val notificationHelper= NotificationHelper(context)
+                                scope.launch {
+                                    SOSDispatcher.dispatch(
+                                        context = context,
+                                        onDone  = { success, msg ->
+                                            SOScalled = true
+                                            sendingSOS=false
+                                            clickCount = 0
+                                            maybeSOS=false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text("Call SOS")
+                }
+            },
+            text={
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Click the button 5 times to call SOS", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge)
+
+                    Spacer(Modifier.height(15.dp))
+
+                    Text("Click ${5-clickCount} more times to call SOS")
+                }
+            }
+        )
+    }
+    if (sendingSOS) {
+        AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            dismissButton = {},
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+
+                    Spacer(Modifier.height(20.dp))
+
+                    Text(
+                        "Calling SOS...\nGetting location and preparing medical report.",
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         )
     }
 

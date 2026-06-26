@@ -110,10 +110,19 @@ fun getInfoScreen(navController: NavController){
 
         OutlinedTextField(
             value = emergency,
-            onValueChange = { emergency = it },
+            onValueChange = {
+                if (it.all(Char::isDigit) && it.length <= 10) {
+                    emergency = it
+                }
+            },
             singleLine = true,
             label = { Text("Enter emergency contact") },
-            prefix = {Text("+91", style = MaterialTheme.typography.labelMedium)}
+            prefix = {
+                Text(
+                    "+91",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
         )
 
 

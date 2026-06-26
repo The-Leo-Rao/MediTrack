@@ -1,5 +1,6 @@
 package com.example.meditrack.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,12 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ForgotPasswordScreen(navController: NavController) {
+
+    BackHandler {
+        navController.navigate("login") {
+            popUpTo("forgotPassword") { inclusive = true }
+        }
+    }
 
     val auth = FirebaseAuth.getInstance()
 
