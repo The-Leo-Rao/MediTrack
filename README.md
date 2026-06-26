@@ -105,6 +105,21 @@ The dialog contains two **independent** buttons. You can use either one on its o
 
 ---
 
+### Demo Login
+
+You can sign in with the pre-seeded demo account (no sign-up needed):
+
+| Field    | Value                 |
+|----------|-----------------------|
+| Email    | `example@meditrack.com` |
+| Password | `devfusion3.0`        |
+
+> [!NOTE]
+> The app opens on the login screen. Use the credentials above to sign in, or create
+> a new account via **New to MediTrack?** on the login screen.
+
+---
+
 ### 1. Seed Test Data (historical sample data)
 
 **Button:** `Seed Test Data`
@@ -118,10 +133,10 @@ and records screens have something to show immediately:
 - Example medication reminders
 
 **How to use:** open the App Info dialog and tap **Seed Test Data**. Then go to the
-**Vitals** screen   each vital card and its detail graph (1D / 1W / 1M) will now show
+**Vitals** screen - each vital card and its detail graph (1D / 1W / 1M) will now show
 backfilled history. Use this to demo the **History graphs** and **PDF report**.
 
-> [!] Seeding **replaces** existing vitals data and re-adds the demo records/reminders,
+> [!WARNING] Seeding **replaces** existing vitals data and re-adds the demo records/reminders,
 > so tapping it repeatedly will create duplicate records/reminders. Use it once for a clean demo.
 
 ---
@@ -131,7 +146,7 @@ backfilled history. Use this to demo the **History graphs** and **PDF report**.
 **Button:** `Toggle live server`
 
 Starts (or stops) a **simulated real-time vitals stream** that mimics a live bedside
-sensor. This is separate from the historical seed above   it generates *new* readings
+sensor. This is separate from the historical seed above - it generates *new* readings
 continuously while it's running.
 
 When the live feed is **on**:
@@ -145,13 +160,13 @@ When **off**, the header shows **"Sensor Offline"** and the last recorded values
 then open the **Vitals** screen to watch values update live. Tap **Toggle live server**
 again to stop it. Use this to demo **live monitoring** and the **abnormal-episode alerts**.
 
-> [!] The live feed comes from an in-app simulator (`SimulatedVitalSource`), not a network
-> server   the architecture is BLE-ready, so a real sensor can be swapped in without
+> [!WARNING] The live feed comes from an in-app simulator (`SimulatedVitalSource`), not a network
+> server - the architecture is BLE-ready, so a real sensor can be swapped in without
 > changing the rest of the app.
 
 ---
 
-### SOS Feature- Required Permission
+### SOS Feature - Required Permission
 
 The SOS emergency feature requires a restricted permission that must be manually enabled on the device. After installing the app:
 
@@ -169,6 +184,7 @@ Without this step, the SOS button will not be able to send SMS messages or acces
 APK file:
 
 **[Drive Link](https://drive.google.com/file/d/1lIJ50rXZf5mBwQ4kwImwC1yQxSIoi4qG/view?usp=sharing)**
+> Demo login — Email: `example@meditrack.com` · Password: `devfusion3.0`
 
 ---
 
