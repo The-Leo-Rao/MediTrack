@@ -149,12 +149,14 @@ fun profileScreen(navController: NavController){
                 var editChronic by remember { mutableStateOf(false) }
                 var editAllergies by remember { mutableStateOf(false) }
                 var editEmergency by remember { mutableStateOf(false) }
+                var editAge by remember { mutableStateOf(false) }
 
                 var name: String? by remember { mutableStateOf("") }
                 var bloodG: String? by remember { mutableStateOf("") }
                 var chronic: String? by remember { mutableStateOf("") }
                 var allergies: String? by remember { mutableStateOf("") }
                 var emergency: String? by remember { mutableStateOf("") }
+                var age: String? by remember { mutableStateOf("") }
 
                 val user = FirebaseAuth.getInstance().currentUser
                 val email = user?.email?.substringBefore("@")
@@ -166,6 +168,7 @@ fun profileScreen(navController: NavController){
                         .document(it)
                         .get()
                         .addOnSuccessListener { document ->
+                            age=document.getString("Age")
                             name = document.getString("name")
                             bloodG = document.getString("Blood-Group")
                             chronic = document.getString("Chronic illnesses")
@@ -198,6 +201,32 @@ fun profileScreen(navController: NavController){
                         )
                         Spacer(Modifier.weight(0.05f))
                         Button(onClick = { editName = true }) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(15.dp))
+
+                Card(
+                    modifier = Modifier.padding(horizontal = 15.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Age: $age",
+                            modifier = Modifier.weight(1f),
+                            maxLines=1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.weight(0.05f))
+                        Button(onClick = { editAge = true }) {
                             Icon(
                                 Icons.Default.Edit,
                                 contentDescription = null
@@ -540,6 +569,53 @@ fun profileScreen(navController: NavController){
                                     prefix = {
                                         Text(
                                             "+91",
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
+                                    }
+                                )
+
+                                Spacer(Modifier.height(15.dp))
+
+                                Text(errM)
+                            }
+                        }
+                    )
+                }
+
+                if (editAge) {
+                    var newname by remember { mutableStateOf("") }
+                    var errM by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { editAge = false },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    when{
+                                        newname.isBlank()->{errM="Age cannot be Blank"}
+                                        ((newname.toInt()>110)||(newname.toInt()<1))->{errM="Invalid Age"}
+
+                                        else->{
+                                            user?.uid?.let {
+                                                fstore.collection("users")
+                                                    .document(it)
+                                                    .update("Age", newname)
+                                            }
+                                            editAge = false
+                                        }
+                                    }
+                                }) { Text("Confirm", style = MaterialTheme.typography.labelSmall) }
+                        },
+
+                        title = { Text("Edit Age", style = MaterialTheme.typography.titleLarge) },
+                        text = {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                OutlinedTextField(
+                                    value = newname,
+                                    onValueChange = { newname = it },
+                                    singleLine = true,
+                                    suffix = {
+                                        Text(
+                                            "years",
                                             style = MaterialTheme.typography.labelMedium
                                         )
                                     }

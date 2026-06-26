@@ -71,7 +71,7 @@ fun signUpScreen(navController: NavController){
             singleLine = true
         )
 
-        Spacer(Modifier.width(15.dp))
+        Spacer(Modifier.height(15.dp))
 
         OutlinedTextField(
             value = password,
@@ -93,7 +93,7 @@ fun signUpScreen(navController: NavController){
             }
         )
 
-        Spacer(Modifier.height(15.dp))
+        //Spacer(Modifier.height(15.dp))
 
         OutlinedTextField(
             value = password2,

@@ -45,6 +45,7 @@ fun getInfoScreen(navController: NavController){
     ){
         val focusManager = LocalFocusManager.current
         var errMsg by remember { mutableStateOf("") }
+        var age by remember { mutableStateOf("") }
         var allergies by remember{mutableStateOf("")}
         var chronic by remember{mutableStateOf("")}
         var expanded by remember { mutableStateOf(false) }
@@ -57,6 +58,15 @@ fun getInfoScreen(navController: NavController){
         val bloodGroups = listOf("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-")
 
         Text("Enter Additional Data")
+
+        Spacer(Modifier.height(25.dp))
+
+        OutlinedTextField(
+            value = age,
+            onValueChange = {age=it},
+            singleLine = true,
+            label = {Text("Enter Age")}
+        )
 
         Spacer(Modifier.height(25.dp))
 
@@ -137,6 +147,7 @@ fun getInfoScreen(navController: NavController){
                 when{
                     emergency.isBlank()->{errMsg="Emergency contact is empty"}
                     emergency.length<10->{errMsg="Invalid emergency number"}
+                    ((age.toInt()>110)||(age.toInt()<1))->{errMsg="Invalid Age"}
 
                     else->{
                         focusManager.clearFocus()
@@ -147,6 +158,7 @@ fun getInfoScreen(navController: NavController){
                             .document(uid)
                             .set(
                                 mapOf(
+                                    "Age" to age,
                                     "Blood-Group" to selectedBloodG,
                                     "Allergies" to allergies,
                                     "Chronic illnesses" to chronic,

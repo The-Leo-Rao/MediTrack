@@ -492,7 +492,7 @@ fun reminderScreen(navController: NavController){
                         }
                     }
                 ) {
-                    Text("Call SOS")
+                    Text("Call SOS", style = MaterialTheme.typography.labelMedium)
                 }
             },
             text={
