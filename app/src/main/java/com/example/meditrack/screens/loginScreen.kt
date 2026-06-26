@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -110,6 +111,15 @@ fun loginScreen(navController: NavController){
         }
 
         Spacer(Modifier.height(10.dp))
+
+        TextButton(
+            onClick = { navController.navigate("forgotp") },
+        ) {
+            Text("forgot password?"
+                ,style= MaterialTheme.typography.labelMedium)
+        }
+
+        Spacer(Modifier.height(25.dp))
 
         Text(
             "New to MediTrack?",

@@ -327,17 +327,24 @@ fun profileScreen(navController: NavController){
 
                 if (editName) {
                     var newname by remember { mutableStateOf("") }
+                    var label by remember { mutableStateOf("name") }
                     AlertDialog(
                         onDismissRequest = { editName = false },
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    user?.uid?.let {
-                                        fstore.collection("users")
-                                            .document(it)
-                                            .update("name", newname)
+                                    when{
+                                        newname.isBlank()->{}
+                                        else->{
+                                            user?.uid?.let {
+                                                fstore.collection("users")
+                                                    .document(it)
+                                                    .update("name", newname)
+                                            }
+                                            editName = false
+                                            label="name"
+                                        }
                                     }
-                                    editName = false
 
                                 }) { Text("Confirm", style = MaterialTheme.typography.labelSmall) }
                         },
@@ -348,7 +355,7 @@ fun profileScreen(navController: NavController){
                                 value = newname,
                                 onValueChange = { newname = it },
                                 singleLine = true,
-                                label = { Text("Name") }
+                                label = { Text(label) }
                             )
                         }
                     )
@@ -362,12 +369,18 @@ fun profileScreen(navController: NavController){
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    user?.uid?.let {
-                                        fstore.collection("users")
-                                            .document(it)
-                                            .update("Blood-Group", newname)
+                                    when{
+                                        newname.isBlank()->{}
+
+                                        else->{
+                                            user?.uid?.let {
+                                                fstore.collection("users")
+                                                    .document(it)
+                                                    .update("Blood-Group", newname)
+                                            }
+                                            editBlood = false
+                                        }
                                     }
-                                    editBlood = false
 
                                 }) { Text("Confirm", style = MaterialTheme.typography.labelSmall) }
                         },
@@ -519,16 +532,23 @@ fun profileScreen(navController: NavController){
 
                         title = { Text("Edit emergency contact", style = MaterialTheme.typography.titleLarge) },
                         text = {
-                            OutlinedTextField(
-                                value = newname,
-                                onValueChange = { newname = it },
-                                singleLine = true,
-                                prefix = {Text("+91", style = MaterialTheme.typography.labelMedium)}
-                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                OutlinedTextField(
+                                    value = newname,
+                                    onValueChange = { newname = it },
+                                    singleLine = true,
+                                    prefix = {
+                                        Text(
+                                            "+91",
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
+                                    }
+                                )
 
-                            Spacer(Modifier.height(15.dp))
+                                Spacer(Modifier.height(15.dp))
 
-                            Text(errM)
+                                Text(errM)
+                            }
                         }
                     )
                 }

@@ -485,6 +485,15 @@ class DBHelper(private val context: Context) :
         } finally {
             db.endTransaction()
         }
+
+        AddRecord("DOCTORS NOTE","reduce sugar consumption",1782192600000)
+        AddRecord("NEW PRESCRIPTION","Metformin",1782196200000)
+        AddRecord("FOLLOW UP","1782585000000",1782196200000)
+        AddRecord("NEW SYMPTOM","diarrhea and bloating7",1782360900000)
+
+        AddReminder("Metformin", "1 tablet",11,45,20,30)
+        AddReminder("Multivitamins", "100 ml",8,30,0,0)
+
     }
 
     private fun insertVitalRow(

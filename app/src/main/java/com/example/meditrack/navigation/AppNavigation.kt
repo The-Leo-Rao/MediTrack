@@ -16,6 +16,7 @@ import com.example.meditrack.screens.getInfoScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.example.meditrack.screens.profileScreen
 import com.example.meditrack.screens.reminderScreen
+import com.example.meditrack.screens.ForgotPasswordScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -34,6 +35,7 @@ fun AppNavigation(){
         composable("getInfo"){getInfoScreen(navController)}
         composable("profile"){profileScreen(navController)}
         composable("reminders"){reminderScreen(navController)}
+        composable("forgotp"){ForgotPasswordScreen(navController)}
 
         composable("vitalDetail/{type}"){ backStackEntry ->
             val typeName = backStackEntry.arguments?.getString("type") ?: VitalType.HEART_RATE.name
