@@ -97,15 +97,59 @@ app/google-services.json
 
 ## Demo & Testing
 
-### Seeding Example Data
+Both demo tools live in the same place:
 
-To populate the app with example health data for testing or demonstration purposes, navigate to:
+**Profile screen → tap the ⓘ (info) button in the top-right corner → "App Info" dialog**
 
-**Profile → Info tab**
+The dialog contains two **independent** buttons. You can use either one on its own, or both together.
 
-There you will find buttons to:
-- **Seed example data** — populates the app with sample vitals, records, and reminders
-- **Simulate live server** — starts a simulated live vitals feed, mimicking a real-time sensor stream on the vitals screen
+---
+
+### 1. Seed Test Data (historical sample data)
+
+**Button:** `Seed Test Data`
+
+Populates the app with ~30 days of realistic **historical** data so the graphs, reports,
+and records screens have something to show immediately:
+
+- Sample readings for every vital (heart rate, SpO₂, blood pressure, temperature,
+  blood sugar, weight) spread across the last 30 days
+- Example medical records (doctor's note, prescription, symptom, follow-up)
+- Example medication reminders
+
+**How to use:** open the App Info dialog and tap **Seed Test Data**. Then go to the
+**Vitals** screen — each vital card and its detail graph (1D / 1W / 1M) will now show
+backfilled history. Use this to demo the **History graphs** and **PDF report**.
+
+> [!] Seeding **replaces** existing vitals data and re-adds the demo records/reminders,
+> so tapping it repeatedly will create duplicate records/reminders. Use it once for a clean demo.
+
+---
+
+### 2. Live Simulated Sensor (real-time feed)
+
+**Button:** `Toggle live server`
+
+Starts (or stops) a **simulated real-time vitals stream** that mimics a live bedside
+sensor. This is separate from the historical seed above — it generates *new* readings
+continuously while it's running.
+
+When the live feed is **on**:
+- The Vitals header shows **"Sensor Live · N readings recorded"**
+- Vital cards update their numbers in real time and animate a live sparkline
+- Readings are recorded to history as they stream in
+
+When **off**, the header shows **"Sensor Offline"** and the last recorded values are kept.
+
+**How to use:** open the App Info dialog and tap **Toggle live server** to start the feed,
+then open the **Vitals** screen to watch values update live. Tap **Toggle live server**
+again to stop it. Use this to demo **live monitoring** and the **abnormal-episode alerts**.
+
+> [!] The live feed comes from an in-app simulator (`SimulatedVitalSource`), not a network
+> server — the architecture is BLE-ready, so a real sensor can be swapped in without
+> changing the rest of the app.
+
+---
 
 ### SOS Feature — Required Permission
 
