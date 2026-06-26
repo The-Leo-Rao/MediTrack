@@ -136,7 +136,8 @@ and records screens have something to show immediately:
 **Vitals** screen - each vital card and its detail graph (1D / 1W / 1M) will now show
 backfilled history. Use this to demo the **History graphs** and **PDF report**.
 
-> [!WARNING] Seeding **replaces** existing vitals data and re-adds the demo records/reminders,
+> [!WARNING]
+> Seeding **replaces** existing vitals data and re-adds the demo records/reminders,
 > so tapping it repeatedly will create duplicate records/reminders. Use it once for a clean demo.
 
 ---
@@ -160,7 +161,8 @@ When **off**, the header shows **"Sensor Offline"** and the last recorded values
 then open the **Vitals** screen to watch values update live. Tap **Toggle live server**
 again to stop it. Use this to demo **live monitoring** and the **abnormal-episode alerts**.
 
-> [!WARNING] The live feed comes from an in-app simulator (`SimulatedVitalSource`), not a network
+> [!WARNING]
+> The live feed comes from an in-app simulator (`SimulatedVitalSource`), not a network
 > server - the architecture is BLE-ready, so a real sensor can be swapped in without
 > changing the rest of the app.
 
