@@ -46,7 +46,7 @@ class VitalViewModel(app: Application) : AndroidViewModel(app) {
 
     private val monitor = VitalsMonitor(source, repository, viewModelScope)
 
-    private var monitoring = false
+    protected var monitoring = false
 
 
     // ── Control ────────────────────────────────────────────────────────────────

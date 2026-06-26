@@ -109,7 +109,7 @@ fun VitalDetailScreen(navController: NavController, type: VitalType) {
                 ) {
                     Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
                         Text(
-                            if (continuous) "Live" else "Latest logged",
+                            if (vm.isMonitoring) "Live" else "Latest logged",
                             style = MaterialTheme.typography.labelSmall
                         )
                         Spacer(Modifier.height(6.dp))

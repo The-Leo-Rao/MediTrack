@@ -165,11 +165,19 @@ fun VitalScreen(navController: NavController) {
                         Spacer(Modifier.height(8.dp))
                         Text("VITALS", style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.height(4.dp))
+                        if(vm.isMonitoring){
                         Text(
-                            "Live · $readingCount readings recorded",
+                            "Sensor Live · $readingCount readings recorded",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
+                        }else{
+                        Text(
+                            "Sensor Offline · $readingCount readings recorded",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        }
                         Spacer(Modifier.height(4.dp))
                     }
                 }
@@ -335,13 +343,6 @@ private fun VitalCard(vm: VitalViewModel, type: VitalType, onClick: () -> Unit) 
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.weight(1f))
-                if (status != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .background(statusColor(status), CircleShape)
-                    )
-                }
             }
 
             Spacer(Modifier.height(10.dp))

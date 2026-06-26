@@ -12,5 +12,6 @@ enum class VitalType(
     TEMPERATURE("Temperature", "°C", sampleIntervalMillis = 30_000),
     HEART_RATE("Heart Rate", "bpm", sampleIntervalMillis = 10_000),
     SPO2("Oxygen (SpO₂)", "%", sampleIntervalMillis = 5_000),
+
     WEIGHT("Weight", "kg", sampleIntervalMillis = 86_400_000, continuous = false),
 }

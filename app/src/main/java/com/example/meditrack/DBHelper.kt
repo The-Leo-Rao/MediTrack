@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import androidx.compose.remote.creation.dsl.random
 import com.example.meditrack.Notification.cancelAlarm
 import com.example.meditrack.Notification.scheduleAlarm
 import com.example.meditrack.clinical.VitalStatus
@@ -420,7 +421,7 @@ class DBHelper(private val context: Context) :
                                 (0..59).random() * 60L * 1000L
 
                     insertVitalRow(
-                        type = "HEART RATE",
+                        type = VitalType.HEART_RATE.name,
                         val1 = (60..110).random().toDouble(),
                         val2 = 0.0,
                         unit = "bpm",
@@ -429,9 +430,12 @@ class DBHelper(private val context: Context) :
                         db = db
                     )
 
+                    val baseWeight = 71.0
+                    val dayWeight = baseWeight + (dayOffset * 0.05) + (Math.random() * 0.6 - 0.3)
+
                     insertVitalRow(
-                        type = "WEIGHT",
-                        val1 = (68..74).random().toDouble(),
+                        type = VitalType.WEIGHT.name,
+                        val1 = dayWeight,
                         val2 = 0.0,
                         unit = "kg",
                         timestamp = timestamp,
@@ -440,7 +444,7 @@ class DBHelper(private val context: Context) :
                     )
 
                     insertVitalRow(
-                        type = "BLOOD PRESSURE",
+                        type = VitalType.BLOOD_PRESSURE.name,
                         val1 = (100..150).random().toDouble(),
                         val2 = (60..95).random().toDouble(),
                         unit = "mmHg",
@@ -450,7 +454,7 @@ class DBHelper(private val context: Context) :
                     )
 
                     insertVitalRow(
-                        type = "SPO2",
+                        type = VitalType.SPO2.name,
                         val1 = (92..100).random().toDouble(),
                         val2 = 0.0,
                         unit = "%",
@@ -460,7 +464,7 @@ class DBHelper(private val context: Context) :
                     )
 
                     insertVitalRow(
-                        type = "BODY TEMPERATURE",
+                        type = VitalType.TEMPERATURE.name,
                         val1 = ((365..390).random() / 10.0),
                         val2 = 0.0,
                         unit = "°C",
@@ -470,7 +474,7 @@ class DBHelper(private val context: Context) :
                     )
 
                     insertVitalRow(
-                        type = "BLOOD SUGAR",
+                        type = VitalType.BLOOD_SUGAR.name,
                         val1 = (70..220).random().toDouble(),
                         val2 = 0.0,
                         unit = "mg/dL",
