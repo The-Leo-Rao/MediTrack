@@ -120,7 +120,7 @@ Without this step, the SOS button will not be able to send SMS messages or acces
 
 # Google Drive Link
 
-APK / Demo / Additional Files:
+APK file:
 
 **[Drive Link](https://drive.google.com/file/d/1lIJ50rXZf5mBwQ4kwImwC1yQxSIoi4qG/view?usp=sharing)**
 
