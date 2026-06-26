@@ -34,7 +34,7 @@ The application aims to make personal healthcare management simple, organized, a
 
 ### Libraries & Tools
 
-* iText 7 (PDF generation)
+* Android PdfDocument (PDF generation)
 * MPAndroidChart (Vital statistics graphs)
 * Coil (Image loading)
 * Google Play Services Location API
@@ -59,6 +59,8 @@ The application aims to make personal healthcare management simple, organized, a
 * Local SQLite storage
 * Cloud synchronization using Firebase
 * Modern Material Design UI
+* Clinical classification & alerting
+* Spike-preserving graphs (min/max decimation downsampling)
 
 ---
 
