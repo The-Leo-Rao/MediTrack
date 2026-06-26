@@ -101,6 +101,7 @@ fun VitalScreen(navController: NavController) {
 
     val context = LocalContext.current
     val vm = vitalViewModel()
+    val isMonitoring by vm.isMonitoringFlow.collectAsState()
 
     val readingCount by vm.historyCount.collectAsState(initial = 0)
 
@@ -165,7 +166,7 @@ fun VitalScreen(navController: NavController) {
                         Spacer(Modifier.height(8.dp))
                         Text("VITALS", style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.height(4.dp))
-                        if(vm.isMonitoring){
+                        if(isMonitoring){
                         Text(
                             "Sensor Live · $readingCount readings recorded",
                             style = MaterialTheme.typography.labelSmall,
@@ -304,11 +305,13 @@ fun VitalScreen(navController: NavController) {
 /** One vital tile: name + icon + live value + status + a live sparkline. */
 @Composable
 private fun VitalCard(vm: VitalViewModel, type: VitalType, onClick: () -> Unit) {
+    val isMonitoring by vm.isMonitoringFlow.collectAsState()
     val continuous = type.continuous
 
-    val reading = if (continuous)
+    val reading = if (vm.isContinuous(type) && isMonitoring)
         remember(type) { vm.liveStream(type) }.collectAsState(initial = null).value
-    else null
+    else
+        null
 
     val points: List<GraphPoint> = if (continuous)
         remember(type) { vm.liveGraph(type) }.collectAsState().value

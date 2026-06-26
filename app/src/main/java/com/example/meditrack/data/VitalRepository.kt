@@ -1,5 +1,6 @@
 package com.example.meditrack.data
 
+import android.util.Log
 import com.example.meditrack.DBHelper
 import com.example.meditrack.Vital
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +46,9 @@ class VitalRepository(private val db: DBHelper) {
             System.currentTimeMillis(),
             note = note ?: "",
         )
+        Log.d("MEDITRACK", "setAVital returned id=$id")
         bump()
+        Log.d("MEDITRACK", "bump done, revision=${revision.value}")
         id
     }
 
@@ -73,8 +76,11 @@ class VitalRepository(private val db: DBHelper) {
             .distinctUntilChanged()
 
     fun observeLatest(type: VitalType): Flow<Vital?> =
-        revision.map { withContext(Dispatchers.IO) { db.getLatestVital(type.name) } }
-            .distinctUntilChanged()
+        revision.map {
+            val result = withContext(Dispatchers.IO) { db.getLatestVital(type.name) }
+            Log.d("MEDITRACK", "observeLatest $type → ${result?.val1} ts=${result?.timestamp}")
+            result
+        }.distinctUntilChanged()
 
     fun observeCount(): Flow<Int> =
         revision.map { withContext(Dispatchers.IO) { db.getVitalCount() } }
@@ -83,4 +89,11 @@ class VitalRepository(private val db: DBHelper) {
     fun observeEvents(limit: Int = 100): Flow<List<VitalEvent>> =
         revision.map { withContext(Dispatchers.IO) { db.getRecentEvents(limit) } }
             .distinctUntilChanged()
+
+    suspend fun seedTestData() = withContext(Dispatchers.IO) {
+        db.seedDemoVitals()
+        Log.d("MEDITRACK", "seed done, bumping")
+        bump()
+        Log.d("MEDITRACK", "seed bump done, revision=${revision.value}")
+    }
 }

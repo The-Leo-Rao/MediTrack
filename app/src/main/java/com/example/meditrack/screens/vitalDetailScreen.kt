@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.example.meditrack.data.VitalEvent
@@ -54,11 +55,13 @@ import com.example.meditrack.ui.VitalChartView
 fun VitalDetailScreen(navController: NavController, type: VitalType) {
 
     val vm = vitalViewModel()
+    val isMonitoring by vm.isMonitoringFlow.collectAsState()
     val continuous = vm.isContinuous(type)
 
-    val reading = if (continuous)
+    val reading = if (continuous && isMonitoring)
         remember(type) { vm.liveStream(type) }.collectAsState(initial = null).value
     else null
+
     val latest = remember(type) { vm.latest(type) }.collectAsState(initial = null).value
     val count by vm.historyCount.collectAsState(initial = 0)
 
@@ -116,7 +119,7 @@ fun VitalDetailScreen(navController: NavController, type: VitalType) {
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(
                                 if (v1 != null) formatVital(type, v1, v2) else "No data yet",
-                                style = MaterialTheme.typography.displaySmall
+                                style = MaterialTheme.typography.titleLarge.copy(fontSize=32.sp)
                             )
                             if (v1 != null) {
                                 Spacer(Modifier.width(6.dp))

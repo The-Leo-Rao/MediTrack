@@ -569,8 +569,6 @@ fun profileScreen(navController: NavController){
     }
 
     if(showInfo){
-        val context= LocalContext.current
-        val dbHelper= DBHelper(context)
         AlertDialog(
             onDismissRequest = {showInfo=false},
             confirmButton = {},
@@ -601,7 +599,7 @@ fun profileScreen(navController: NavController){
                     item{
                         Button(
                             onClick = {
-                                dbHelper.seedDemoVitals()
+                                vm.seedTestData()
                                 showInfo=false}) {
                         Text("Seed Test Data", style = MaterialTheme.typography.labelSmall)
                     }}

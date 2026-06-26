@@ -18,7 +18,9 @@ import com.example.meditrack.sensor.VitalSensorSource
 import com.example.meditrack.sensor.VitalsMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -46,27 +48,29 @@ class VitalViewModel(app: Application) : AndroidViewModel(app) {
 
     private val monitor = VitalsMonitor(source, repository, viewModelScope)
 
-    protected var monitoring = false
+    private val _isMonitoring = MutableStateFlow(false)
+
+    val isMonitoringFlow: StateFlow<Boolean> = _isMonitoring.asStateFlow()
 
 
     // ── Control ────────────────────────────────────────────────────────────────
 
     fun startMonitoring() {
-        if (!monitoring) {
-            monitoring = true
+        if (!_isMonitoring.value) {
+            _isMonitoring.value = true
             monitor.start()
         }
     }
 
     fun stopMonitoring() {
-        if (monitoring) {
-            monitoring = false
+        if (_isMonitoring.value) {
+            _isMonitoring.value = false
             monitor.stop()
         }
     }
 
     fun toggleMonitoring() {
-        if (monitoring) {
+        if (_isMonitoring.value) {
             stopMonitoring()
         } else {
             startMonitoring()
@@ -74,7 +78,7 @@ class VitalViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     val isMonitoring: Boolean
-        get() = monitoring
+        get() = _isMonitoring.value
 
     // ── Live (real-time, in-memory) ────────────────────────────────────────────
 
@@ -141,5 +145,11 @@ class VitalViewModel(app: Application) : AndroidViewModel(app) {
     override fun onCleared() {
         monitor.stop()
         super.onCleared()
+    }
+
+    fun seedTestData() {
+        viewModelScope.launch {
+            repository.seedTestData()
+        }
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -59,7 +60,7 @@ fun signUpScreen(navController: NavController){
         val auth= FirebaseAuth.getInstance()
         val personalData=FirebaseFirestore.getInstance()
 
-        Text("Sign Up")
+        Text("Sign Up", style = MaterialTheme.typography.titleLarge.copy(fontSize = 40.sp))
 
         Spacer(Modifier.height(25.dp))
 

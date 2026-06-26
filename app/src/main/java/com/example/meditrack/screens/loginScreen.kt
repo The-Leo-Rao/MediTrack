@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -50,7 +51,7 @@ fun loginScreen(navController: NavController){
         var passwordVisible by remember {mutableStateOf(false) }
         var errMsg by remember{mutableStateOf("")}
 
-        Text("Login")
+        Text("Login", style = MaterialTheme.typography.titleLarge.copy(fontSize = 40.sp))
 
         Spacer(Modifier.height(25.dp))
 

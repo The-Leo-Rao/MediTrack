@@ -332,7 +332,8 @@ class DBHelper(private val context: Context) :
 
     fun setAVital(type: String,val1: Double,val2: Double,unit: String,timestamp: Long,note: String): Long{
 
-        val db=readableDatabase
+        val db=writableDatabase
+
 
         val entry= ContentValues().apply{
             put("type",type)
@@ -407,7 +408,7 @@ class DBHelper(private val context: Context) :
         writableDatabase.delete("vitalsData", null, null)
         val dayMs = 24L * 60 * 60 * 1000
         val hourMs = 60L * 60 * 1000
-        val now = System.currentTimeMillis()
+        val now = System.currentTimeMillis() - dayMs
 
         db.beginTransaction()
         try {
