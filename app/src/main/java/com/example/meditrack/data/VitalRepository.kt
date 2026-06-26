@@ -3,6 +3,8 @@ package com.example.meditrack.data
 import android.util.Log
 import com.example.meditrack.DBHelper
 import com.example.meditrack.Vital
+import com.example.meditrack.clinical.ReferenceRanges
+import com.example.meditrack.clinical.VitalStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,17 +40,22 @@ class VitalRepository(private val db: DBHelper) {
         value2: Double? = null,
         note: String? = null,
     ): Long = withContext(Dispatchers.IO) {
+        val now = System.currentTimeMillis()
         val id = db.setAVital(
             type.name,
             value1,
-            if (type.hasSecondValue) value2?: 0.0 else 0.0,
+            if (type.hasSecondValue) value2 ?: 0.0 else 0.0,
             type.defaultUnit,
-            System.currentTimeMillis(),
+            now,
             note = note ?: "",
         )
-        Log.d("MEDITRACK", "setAVital returned id=$id")
+
+        val status = ReferenceRanges.classify(type, value1, value2)
+        if (status != VitalStatus.NORMAL) {
+            db.addVitalEvent(type.name, status.name, now, now, value1, value2)
+        }
+
         bump()
-        Log.d("MEDITRACK", "bump done, revision=${revision.value}")
         id
     }
 
