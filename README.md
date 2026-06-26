@@ -8,7 +8,7 @@
 
 # About the Project
 
-**MediTrack** is an Android application designed to help users manage their personal health information in one place. It allows users to securely record medical information, monitor vital signs through graphs, manage medication reminders, generate professional medical reports in PDF format, and quickly share emergency information—including their live location and latest medical report—with an emergency contact.
+**MediTrack** is an Android application designed to help users manage their personal health information in one place. It allows users to securely record medical information, monitor vital signs through graphs, manage medication reminders, generate professional medical reports in PDF format, and quickly share emergency information including their live location and latest medical report with an emergency contact.
 
 The application aims to make personal healthcare management simple, organized, and accessible during both everyday use and emergencies.
 
@@ -118,7 +118,7 @@ and records screens have something to show immediately:
 - Example medication reminders
 
 **How to use:** open the App Info dialog and tap **Seed Test Data**. Then go to the
-**Vitals** screen — each vital card and its detail graph (1D / 1W / 1M) will now show
+**Vitals** screen   each vital card and its detail graph (1D / 1W / 1M) will now show
 backfilled history. Use this to demo the **History graphs** and **PDF report**.
 
 > [!] Seeding **replaces** existing vitals data and re-adds the demo records/reminders,
@@ -131,7 +131,7 @@ backfilled history. Use this to demo the **History graphs** and **PDF report**.
 **Button:** `Toggle live server`
 
 Starts (or stops) a **simulated real-time vitals stream** that mimics a live bedside
-sensor. This is separate from the historical seed above — it generates *new* readings
+sensor. This is separate from the historical seed above   it generates *new* readings
 continuously while it's running.
 
 When the live feed is **on**:
@@ -146,12 +146,12 @@ then open the **Vitals** screen to watch values update live. Tap **Toggle live s
 again to stop it. Use this to demo **live monitoring** and the **abnormal-episode alerts**.
 
 > [!] The live feed comes from an in-app simulator (`SimulatedVitalSource`), not a network
-> server — the architecture is BLE-ready, so a real sensor can be swapped in without
+> server   the architecture is BLE-ready, so a real sensor can be swapped in without
 > changing the rest of the app.
 
 ---
 
-### SOS Feature — Required Permission
+### SOS Feature- Required Permission
 
 The SOS emergency feature requires a restricted permission that must be manually enabled on the device. After installing the app:
 
